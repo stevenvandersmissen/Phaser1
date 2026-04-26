@@ -1,0 +1,2257 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phaser.js — Live Demo Lessen</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #0e0e14;
+  --panel:    #16161f;
+  --panel2:   #1e1e2a;
+  --border:   #2a2a38;
+  --border2:  #3a3a50;
+  --text:     #e8e8f0;
+  --text2:    #9090a8;
+  --text3:    #55556a;
+  --accent:   #7c6fff;
+  --accent2:  #a89fff;
+  --green:    #3ecf8e;
+  --green-bg: #0d2a1e;
+  --amber:    #f5a623;
+  --amber-bg: #2a1e0a;
+  --red:      #ff6b6b;
+  --mono:     'JetBrains Mono', monospace;
+  --display:  'Syne', sans-serif;
+}
+
+body {
+  font-family: var(--display);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+}
+.header-left { display: flex; align-items: center; gap: 1rem; }
+.logo { font-size: 18px; font-weight: 800; color: var(--accent2); }
+.header-sep { width: 1px; height: 20px; background: var(--border); }
+.les-switcher { display: flex; gap: 6px; }
+.les-tab {
+  padding: 6px 16px;
+  border: 1px solid var(--border2);
+  border-radius: 99px;
+  background: transparent;
+  color: var(--text2);
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .2s;
+}
+.les-tab:hover { border-color: var(--accent); color: var(--accent2); }
+.les-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* ── Hoofd layout: 3 kolommen ── */
+.layout {
+  display: grid;
+  grid-template-columns: 260px 1fr 1fr;
+  height: calc(100vh - 57px);
+}
+
+/* ── Stappen kolom ── */
+.stappen-kolom {
+  border-right: 1px solid var(--border);
+  background: var(--panel);
+  overflow-y: auto;
+  padding: 1.5rem 0;
+}
+.stappen-titel {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text3);
+  padding: 0 1.25rem .75rem;
+}
+.stap-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 1.25rem;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: all .15s;
+  position: relative;
+}
+.stap-item:hover { background: var(--panel2); }
+.stap-item.active {
+  background: var(--panel2);
+  border-left-color: var(--accent);
+}
+.stap-item.done .stap-bullet { background: var(--green); border-color: var(--green); }
+.stap-item.done .stap-bullet::after { content: '✓'; color: #fff; font-size: 11px; font-weight: 700; }
+.stap-bullet {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--border2);
+  background: var(--panel);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text3);
+  flex-shrink: 0;
+  margin-top: 1px;
+  transition: all .2s;
+  font-family: var(--mono);
+}
+.stap-item.active .stap-bullet {
+  border-color: var(--accent);
+  color: var(--accent2);
+  background: rgba(124,111,255,.15);
+}
+.stap-info {}
+.stap-naam {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+  margin-bottom: 3px;
+}
+.stap-item.active .stap-naam { color: var(--accent2); }
+.stap-desc {
+  font-size: 12px;
+  color: var(--text3);
+  line-height: 1.5;
+  font-family: var(--mono);
+  font-weight: 400;
+}
+/* verbindingslijn tussen stappen */
+.stap-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: calc(1.25rem + 11px);
+  top: 38px;
+  width: 2px;
+  height: calc(100% - 14px);
+  background: var(--border);
+}
+
+/* ── Code kolom ── */
+.code-kolom {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+  background: var(--panel2);
+  overflow: hidden;
+}
+.kolom-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+  flex-shrink: 0;
+}
+.kolom-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text3);
+}
+.run-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 18px;
+  border: none;
+  border-radius: 99px;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity .15s, transform .1s;
+}
+.run-btn:hover { opacity: .85; }
+.run-btn:active { transform: scale(.96); }
+
+/* Code uitleg blokken */
+.code-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.code-blok {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.code-blok.nieuw { border-color: var(--accent); }
+.code-blok-label {
+  font-size: 11px;
+  padding: 6px 12px;
+  background: var(--border);
+  color: var(--text3);
+  font-family: var(--mono);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.code-blok.nieuw .code-blok-label {
+  background: rgba(124,111,255,.25);
+  color: var(--accent2);
+}
+.nieuw-badge {
+  display: inline-block;
+  font-size: 10px;
+  padding: 1px 7px;
+  border-radius: 99px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+}
+.code-blok pre {
+  padding: 12px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.7;
+  background: #12121a;
+  color: #cdd6f4;
+  overflow-x: auto;
+  white-space: pre;
+}
+.uitleg-blok {
+  background: var(--amber-bg);
+  border: 1px solid rgba(245,166,35,.2);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--amber);
+  line-height: 1.65;
+  font-family: var(--mono);
+  font-weight: 400;
+}
+.uitleg-blok strong { color: #ffd27a; font-weight: 600; }
+
+/* ── Preview kolom ── */
+.preview-kolom {
+  display: flex;
+  flex-direction: column;
+  background: #0a0a12;
+  overflow: hidden;
+}
+.preview-inner {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+.preview-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+.preview-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--text3);
+}
+.preview-placeholder .icon { font-size: 40px; opacity: .4; }
+.preview-placeholder p { font-size: 13px; font-family: var(--mono); }
+
+/* ── Nav onderaan stappen ── */
+.stap-nav {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+}
+.stap-nav-btn {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text2);
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s;
+}
+.stap-nav-btn:hover:not(:disabled) { background: var(--panel2); color: var(--text); }
+.stap-nav-btn:disabled { opacity: .25; cursor: default; }
+.stap-nav-btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 700;
+}
+.stap-nav-btn.primary:hover { opacity: .85; }
+
+/* syntax highlighting */
+.kw  { color: #cba6f7; }
+.fn  { color: #89b4fa; }
+.str { color: #a6e3a1; }
+.num { color: #fab387; }
+.cm  { color: #585b70; font-style: italic; }
+.prop{ color: #89dceb; }
+
+/* scrollbar stijl */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo">Phaser.js</div>
+    <div class="header-sep"></div>
+    <div class="les-switcher">
+      <button class="les-tab active" onclick="laadLes(0)">Les 1 — Wat is Phaser?</button>
+      <button class="les-tab" onclick="laadLes(1)">Les 2 — Eerste venster</button>
+      <button class="les-tab" onclick="laadLes(2)">Les 3 — Vormen tekenen</button>
+      <button class="les-tab" onclick="laadLes(3)">Les 4 — Beweging</button>
+      <button class="les-tab" onclick="laadLes(4)">Les 5 — Physics</button>
+      <button class="les-tab" onclick="laadLes(5)">Les 6 — Toetsenbord</button>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- Stappen kolom -->
+  <div class="stappen-kolom">
+    <div class="stappen-titel">Stappen</div>
+    <div id="stappen-lijst"></div>
+    <div class="stap-nav">
+      <button class="stap-nav-btn" id="btn-vorige" onclick="vorigeStap()">← Vorige</button>
+      <button class="stap-nav-btn primary" id="btn-volgende" onclick="volgendeStap()">Volgende →</button>
+    </div>
+  </div>
+
+  <!-- Code kolom -->
+  <div class="code-kolom">
+    <div class="kolom-bar">
+      <span class="kolom-label">Code</span>
+      <button class="run-btn" onclick="voerUit()">▶ Uitvoeren</button>
+    </div>
+    <div class="code-scroll" id="code-weergave"></div>
+  </div>
+
+  <!-- Preview kolom -->
+  <div class="preview-kolom">
+    <div class="kolom-bar">
+      <span class="kolom-label">Resultaat</span>
+    </div>
+    <div class="preview-inner">
+      <div class="preview-placeholder" id="placeholder">
+        <div class="icon">▶</div>
+        <p>Klik op "Uitvoeren" om het resultaat te zien</p>
+      </div>
+      <iframe class="preview-frame" id="preview" style="display:none;"></iframe>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// DATA: lessen met stappen
+// ═══════════════════════════════════════════════════════════
+
+const lessen = [
+
+  // ─── LES 1: WAT IS PHASER? ───────────────────────────────
+  {
+    naam: "Wat is Phaser?",
+    stappen: [
+      {
+        naam: "Wat is een game framework?",
+        desc: "het grote plaatje",
+        uitleg: "Voordat we code schrijven: <strong>wat is Phaser eigenlijk?</strong> Phaser is een framework — een gereedschapskist — die het moeilijke werk van spelontwikkeling voor jou doet. Jij focust op de spellogica, Phaser op de techniek.",
+        blokken: [
+          {
+            label: "zonder Phaser — alles zelf doen",
+            nieuw: false,
+            code:
+`<span class="cm">// Zonder framework moet je ALLES zelf schrijven:</span>
+<span class="cm">// - canvas aanmaken en beheren</span>
+<span class="cm">// - game loop bouwen (requestAnimationFrame)</span>
+<span class="cm">// - botsingen berekenen</span>
+<span class="cm">// - afbeeldingen laden en cachen</span>
+<span class="cm">// - toetsenbordinput afhandelen</span>
+<span class="cm">// - physics simuleren</span>
+<span class="cm">// → honderden regels voor een simpel spel</span>`
+          },
+          {
+            label: "met Phaser — jij schrijft alleen dit",
+            nieuw: true,
+            code:
+`<span class="cm">// Met Phaser doe je gewoon:</span>
+<span class="kw">this</span>.<span class="prop">physics</span>.<span class="prop">add</span>.<span class="fn">collider</span>(speler, platform);
+<span class="cm">// → Phaser berekent alle botsingen automatisch</span>
+
+<span class="kw">this</span>.<span class="prop">input</span>.<span class="prop">keyboard</span>.<span class="fn">createCursorKeys</span>();
+<span class="cm">// → Phaser regelt alle toetsenbordinput</span>
+
+<span class="kw">this</span>.<span class="prop">load</span>.<span class="fn">image</span>(<span class="str">'speler'</span>, <span class="str">'speler.png'</span>);
+<span class="cm">// → Phaser laadt en cachet de afbeelding</span>`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body style="background:#16213e;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;font-family:monospace;">
+<div style="color:#e8e8f0;text-align:center;max-width:420px;padding:2rem;">
+  <div style="font-size:48px;margin-bottom:1rem;">🎮</div>
+  <h2 style="color:#a89fff;font-size:22px;margin-bottom:1rem;">Phaser.js</h2>
+  <p style="color:#9090a8;line-height:1.8;font-size:14px;">Een <strong style="color:#e8e8f0">game framework</strong> is een gereedschapskist voor spelontwikkeling. Phaser doet het moeilijke werk — jij schrijft de spellogica.</p>
+  <div style="margin-top:1.5rem;display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:left;">
+    <div style="background:#1e1e2a;border:1px solid #3a3a50;border-radius:8px;padding:10px 12px;font-size:12px;color:#3ecf8e;">✓ Rendering</div>
+    <div style="background:#1e1e2a;border:1px solid #3a3a50;border-radius:8px;padding:10px 12px;font-size:12px;color:#3ecf8e;">✓ Physics</div>
+    <div style="background:#1e1e2a;border:1px solid #3a3a50;border-radius:8px;padding:10px 12px;font-size:12px;color:#3ecf8e;">✓ Input</div>
+    <div style="background:#1e1e2a;border:1px solid #3a3a50;border-radius:8px;padding:10px 12px;font-size:12px;color:#3ecf8e;">✓ Animaties</div>
+    <div style="background:#1e1e2a;border:1px solid #3a3a50;border-radius:8px;padding:10px 12px;font-size:12px;color:#3ecf8e;">✓ Game loop</div>
+    <div style="background:#1e1e2a;border:1px solid #3a3a50;border-radius:8px;padding:10px 12px;font-size:12px;color:#3ecf8e;">✓ Assets laden</div>
+  </div>
+</div>
+</body></html>`
+      },
+
+      {
+        naam: "Hoe werkt een spel?",
+        desc: "de game loop uitgelegd",
+        uitleg: "Elk spel ter wereld draait op hetzelfde principe: de <strong>game loop</strong>. Een loop die razendsnel herhaalt: input lezen → logica uitvoeren → scherm hertekenen. Phaser doet dit automatisch ~60 keer per seconde.",
+        blokken: [
+          {
+            label: "de game loop — concept",
+            nieuw: true,
+            code:
+`<span class="cm">// Elke seconde herhaalt Phaser dit ~60 keer:</span>
+
+<span class="cm">// 1. Lees input</span>
+<span class="cm">//    "Is de pijl-rechts toets ingedrukt?"</span>
+
+<span class="cm">// 2. Voer logica uit</span>
+<span class="cm">//    "Ja → verplaats speler 3px naar rechts"</span>
+<span class="cm">//    "Botst speler met een muur? Zo ja, stop."</span>
+
+<span class="cm">// 3. Teken het scherm opnieuw</span>
+<span class="cm">//    "Teken achtergrond, dan platforms, dan speler"</span>
+
+<span class="cm">// → herhaal (ga terug naar stap 1)</span>
+
+<span class="cm">// Dit zijn de drie functies die Phaser aanroept:</span>
+<span class="cm">//   preload()  — bestanden laden (1x)</span>
+<span class="cm">//   create()   — opbouwen (1x)</span>
+<span class="cm">//   update()   — de loop (~60x per seconde)</span>`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body style="background:#0e0e14;margin:0;font-family:monospace;display:flex;align-items:center;justify-content:center;height:100vh;">
+<div style="text-align:center;color:#e8e8f0;">
+  <p style="color:#9090a8;font-size:13px;margin-bottom:1.5rem;">De game loop draait continu:</p>
+  <div style="display:flex;align-items:center;gap:0;justify-content:center;flex-wrap:wrap;gap:4px;">
+    <div style="background:#2a1e0a;border:1px solid #f5a623;border-radius:8px;padding:12px 16px;font-size:13px;color:#f5a623;">📥 Input lezen</div>
+    <div style="color:#55556a;font-size:20px;padding:0 4px;">→</div>
+    <div style="background:#0d2a1e;border:1px solid #3ecf8e;border-radius:8px;padding:12px 16px;font-size:13px;color:#3ecf8e;">⚙️ Logica</div>
+    <div style="color:#55556a;font-size:20px;padding:0 4px;">→</div>
+    <div style="background:#1a1a3a;border:1px solid #7c6fff;border-radius:8px;padding:12px 16px;font-size:13px;color:#a89fff;">🖥️ Tekenen</div>
+    <div style="color:#55556a;font-size:20px;padding:0 4px;">↩</div>
+  </div>
+  <p style="color:#55556a;font-size:12px;margin-top:1.5rem;">~60 keer per seconde</p>
+  <div id="teller" style="color:#a89fff;font-size:28px;font-weight:700;margin-top:1rem;">0</div>
+  <p style="color:#55556a;font-size:12px;">frames sinds laden</p>
+</div>
+<script>
+let f = 0;
+function loop() { f++; document.getElementById('teller').textContent = f; requestAnimationFrame(loop); }
+loop();
+<\/script>
+</body></html>`
+      },
+
+      {
+        naam: "Wat heb je nodig?",
+        desc: "geen installatie vereist",
+        uitleg: "Het mooie aan Phaser: je hebt <strong>niets te installeren</strong>. Alleen een browser en een tekstbestand. Je laadt Phaser via één scriptregel vanuit het internet — dat is alles.",
+        blokken: [
+          {
+            label: "index.html — minimale structuur",
+            nieuw: true,
+            code:
+`<span class="cm">&lt;!-- Dit is alles wat je nodig hebt --&gt;</span>
+<span class="kw">&lt;!DOCTYPE html&gt;</span>
+<span class="kw">&lt;html&gt;</span>
+<span class="kw">&lt;head&gt;</span>
+  <span class="kw">&lt;title&gt;</span>Mijn spel<span class="kw">&lt;/title&gt;</span>
+
+  <span class="cm">&lt;!-- Stap 1: laad Phaser via CDN --&gt;</span>
+  <span class="kw">&lt;script</span> src=<span class="str">"https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"</span><span class="kw">&gt;&lt;/script&gt;</span>
+
+<span class="kw">&lt;/head&gt;</span>
+<span class="kw">&lt;body&gt;</span>
+  <span class="kw">&lt;script&gt;</span>
+    <span class="cm">// Stap 2: jouw spelcode komt hier</span>
+  <span class="kw">&lt;/script&gt;</span>
+<span class="kw">&lt;/body&gt;</span>
+<span class="kw">&lt;/html&gt;</span>`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body style="background:#16213e;margin:0;font-family:monospace;display:flex;align-items:center;justify-content:center;height:100vh;">
+<div style="color:#e8e8f0;text-align:center;max-width:380px;">
+  <div style="font-size:36px;margin-bottom:1rem;">📁</div>
+  <h3 style="color:#a89fff;margin-bottom:1rem;font-size:16px;">Wat heb je nodig?</h3>
+  <div style="text-align:left;display:flex;flex-direction:column;gap:8px;">
+    <div style="background:#1e1e2a;border:1px solid #3ecf8e;border-radius:6px;padding:10px 14px;font-size:13px;display:flex;gap:10px;align-items:center;"><span style="color:#3ecf8e;">✓</span><span style="color:#e8e8f0;">Een tekstbestand <span style="color:#55556a;">(index.html)</span></span></div>
+    <div style="background:#1e1e2a;border:1px solid #3ecf8e;border-radius:6px;padding:10px 14px;font-size:13px;display:flex;gap:10px;align-items:center;"><span style="color:#3ecf8e;">✓</span><span style="color:#e8e8f0;">Een browser <span style="color:#55556a;">(Chrome, Firefox…)</span></span></div>
+    <div style="background:#1e1e2a;border:1px solid #3ecf8e;border-radius:6px;padding:10px 14px;font-size:13px;display:flex;gap:10px;align-items:center;"><span style="color:#3ecf8e;">✓</span><span style="color:#e8e8f0;">Internetverbinding <span style="color:#55556a;">(voor CDN)</span></span></div>
+    <div style="background:#1e1e2a;border:1px solid #ff6b6b;border-radius:6px;padding:10px 14px;font-size:13px;display:flex;gap:10px;align-items:center;"><span style="color:#ff6b6b;">✗</span><span style="color:#55556a;">Installatie — niet nodig!</span></div>
+    <div style="background:#1e1e2a;border:1px solid #ff6b6b;border-radius:6px;padding:10px 14px;font-size:13px;display:flex;gap:10px;align-items:center;"><span style="color:#ff6b6b;">✗</span><span style="color:#55556a;">Account of licentie — niet nodig!</span></div>
+  </div>
+</div>
+</body></html>`
+      },
+
+      {
+        naam: "Kernbegrippen",
+        desc: "scene, sprite, physics, asset",
+        uitleg: "Vier begrippen kom je in elke Phaser-les opnieuw tegen. Leer ze nu — ze maken de rest veel makkelijker om te begrijpen.",
+        blokken: [
+          {
+            label: "de vier kernbegrippen",
+            nieuw: true,
+            code:
+`<span class="cm">// SCENE</span>
+<span class="cm">// Een "scherm" of niveau in je spel.</span>
+<span class="cm">// Voorbeelden: StartMenu, Level1, GameOver</span>
+<span class="cm">// Een spel kan meerdere scenes hebben.</span>
+
+<span class="cm">// SPRITE</span>
+<span class="cm">// Een afbeelding gekoppeld aan een object.</span>
+<span class="cm">// Jouw speler, een vijand, een munt = sprites.</span>
+<span class="cm">// Sprites hebben positie, schaal en rotatie.</span>
+
+<span class="cm">// ASSET</span>
+<span class="cm">// Externe bestanden: afbeeldingen, geluiden.</span>
+<span class="cm">// Je laadt assets in preload() voor gebruik.</span>
+
+<span class="cm">// PHYSICS</span>
+<span class="cm">// De simulatie van de fysieke wereld:</span>
+<span class="cm">// zwaartekracht, botsen, snelheid.</span>
+<span class="cm">// Phaser heeft dit ingebouwd — gratis!</span>`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body style="background:#0e0e14;margin:0;font-family:monospace;padding:1.5rem;">
+<h3 style="color:#a89fff;font-size:15px;margin-bottom:1rem;text-align:center;">Phaser kernbegrippen</h3>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:480px;margin:0 auto;">
+  <div style="background:#16161f;border:1px solid #7c6fff;border-radius:8px;padding:14px;">
+    <div style="color:#a89fff;font-size:12px;font-weight:700;margin-bottom:6px;">SCENE</div>
+    <div style="color:#9090a8;font-size:12px;line-height:1.6;">Een scherm in je spel: startmenu, level 1, game over. Elk spel heeft minstens één scene.</div>
+  </div>
+  <div style="background:#16161f;border:1px solid #3ecf8e;border-radius:8px;padding:14px;">
+    <div style="color:#3ecf8e;font-size:12px;font-weight:700;margin-bottom:6px;">SPRITE</div>
+    <div style="color:#9090a8;font-size:12px;line-height:1.6;">Een afbeelding als spelobject: speler, vijand, munt. Heeft positie, schaal en rotatie.</div>
+  </div>
+  <div style="background:#16161f;border:1px solid #f5a623;border-radius:8px;padding:14px;">
+    <div style="color:#f5a623;font-size:12px;font-weight:700;margin-bottom:6px;">ASSET</div>
+    <div style="color:#9090a8;font-size:12px;line-height:1.6;">Externe bestanden: afbeeldingen en geluiden. Laden in preload() voor je ze gebruikt.</div>
+  </div>
+  <div style="background:#16161f;border:1px solid #ff6b6b;border-radius:8px;padding:14px;">
+    <div style="color:#ff6b6b;font-size:12px;font-weight:700;margin-bottom:6px;">PHYSICS</div>
+    <div style="color:#9090a8;font-size:12px;line-height:1.6;">Simulatie van de fysieke wereld: zwaartekracht, botsen, snelheid. Ingebouwd in Phaser.</div>
+  </div>
+</div>
+</body></html>`
+      }
+    ]
+  },
+
+  // ─── LES 2: JE EERSTE VENSTER ────────────────────────────
+  {
+    naam: "Je eerste venster",
+    stappen: [
+      {
+        naam: "Het config-object",
+        desc: "breedte, hoogte, type",
+        uitleg: "Elk Phaser-spel begint met een <strong>config-object</strong>. Dit is een JavaScript-object met instellingen: hoe groot is het venster? Welke kleur heeft de achtergrond? Welke scene draait er?",
+        blokken: [
+          {
+            label: "game.js — het config-object",
+            nieuw: true,
+            code:
+`<span class="cm">// Een object in JavaScript: { sleutel: waarde }</span>
+<span class="kw">const</span> <span class="prop">config</span> = {
+
+  <span class="cm">// type: welke renderer gebruiken?</span>
+  <span class="cm">// Phaser.AUTO = kies automatisch WebGL of Canvas</span>
+  <span class="prop">type</span>: Phaser.AUTO,
+
+  <span class="cm">// Grootte van het spelvenster in pixels</span>
+  <span class="prop">width</span>: <span class="num">500</span>,
+  <span class="prop">height</span>: <span class="num">300</span>,
+
+  <span class="cm">// Achtergrondkleur als CSS-kleurstring</span>
+  <span class="prop">backgroundColor</span>: <span class="str">'#1a1a2e'</span>,
+
+  <span class="cm">// scene: hier komen straks onze functies</span>
+  <span class="prop">scene</span>: {}
+
+};`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body style="background:#0e0e14;margin:0;font-family:monospace;display:flex;align-items:center;justify-content:center;height:100vh;">
+<div style="color:#e8e8f0;max-width:400px;text-align:center;">
+  <p style="color:#9090a8;font-size:13px;margin-bottom:1.5rem;">Het config-object vertelt Phaser hoe het spel eruitziet:</p>
+  <div style="background:#16161f;border:1px solid #3a3a50;border-radius:10px;padding:1.25rem;text-align:left;font-size:13px;">
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #2a2a38;"><span style="color:#a89fff;">type</span><span style="color:#3ecf8e;">Phaser.AUTO</span></div>
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #2a2a38;"><span style="color:#a89fff;">width</span><span style="color:#fab387;">500</span></div>
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #2a2a38;"><span style="color:#a89fff;">height</span><span style="color:#fab387;">300</span></div>
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #2a2a38;"><span style="color:#a89fff;">backgroundColor</span><span style="color:#a6e3a1;">'#1a1a2e'</span></div>
+    <div style="display:flex;justify-content:space-between;padding:6px 0;"><span style="color:#a89fff;">scene</span><span style="color:#55556a;">{ … }</span></div>
+  </div>
+</div>
+</body></html>`
+      },
+
+      {
+        naam: "Het spel starten",
+        desc: "new Phaser.Game(config)",
+        uitleg: "Met <strong>new Phaser.Game(config)</strong> geef je het config-object aan Phaser en start het spel. Phaser maakt automatisch een <strong>&lt;canvas&gt;</strong> element aan in je pagina en begint te tekenen.",
+        blokken: [
+          {
+            label: "config (ongewijzigd)",
+            nieuw: false,
+            code:
+`<span class="kw">const</span> <span class="prop">config</span> = {
+  <span class="prop">type</span>: Phaser.AUTO,
+  <span class="prop">width</span>: <span class="num">500</span>,
+  <span class="prop">height</span>: <span class="num">300</span>,
+  <span class="prop">backgroundColor</span>: <span class="str">'#1a1a2e'</span>,
+  <span class="prop">scene</span>: {}
+};`
+          },
+          {
+            label: "spel starten — nieuw",
+            nieuw: true,
+            code:
+`<span class="cm">// Maak een nieuw spel aan met jouw config</span>
+<span class="cm">// Phaser voegt automatisch een &lt;canvas&gt; toe aan de pagina</span>
+<span class="kw">new</span> <span class="fn">Phaser.Game</span>(config);`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+const config = {
+  type: Phaser.AUTO,
+  width: 500,
+  height: 300,
+  backgroundColor: '#1a1a2e',
+  scene: {}
+};
+new Phaser.Game(config);
+<\/script></body></html>`
+      },
+
+      {
+        naam: "De create() functie",
+        desc: "iets zichtbaar maken",
+        uitleg: "Een leeg blauw venster is saai. We voegen een <strong>create()</strong> functie toe aan de scene. Phaser roept deze automatisch één keer aan bij de start. Hier zetten we de eerste tekst op het scherm.",
+        blokken: [
+          {
+            label: "config — scene met create()",
+            nieuw: true,
+            code:
+`<span class="kw">const</span> <span class="prop">config</span> = {
+  <span class="prop">type</span>: Phaser.AUTO,
+  <span class="prop">width</span>: <span class="num">500</span>,
+  <span class="prop">height</span>: <span class="num">300</span>,
+  <span class="prop">backgroundColor</span>: <span class="str">'#1a1a2e'</span>,
+  <span class="prop">scene</span>: {
+
+    <span class="cm">// create() wordt 1x aangeroepen bij de start</span>
+    <span class="fn">create</span>: <span class="kw">function</span>() {
+
+      <span class="cm">// Voeg tekst toe op positie (250, 150)</span>
+      <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">text</span>(<span class="num">250</span>, <span class="num">150</span>, <span class="str">'Hallo Phaser!'</span>, {
+        <span class="prop">fontSize</span>: <span class="str">'28px'</span>,
+        <span class="prop">fill</span>: <span class="str">'#ffffff'</span>
+      }).<span class="fn">setOrigin</span>(<span class="num">0.5</span>); <span class="cm">// gecentreerd</span>
+
+    }
+  }
+};`
+          },
+          {
+            label: "spel starten (ongewijzigd)",
+            nieuw: false,
+            code: `<span class="kw">new</span> <span class="fn">Phaser.Game</span>(config);`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+const config = {
+  type: Phaser.AUTO,
+  width: 500,
+  height: 300,
+  backgroundColor: '#1a1a2e',
+  scene: {
+    create: function() {
+      this.add.text(250, 150, 'Hallo Phaser!', {
+        fontSize: '28px', fill: '#ffffff'
+      }).setOrigin(0.5);
+    }
+  }
+};
+new Phaser.Game(config);
+<\/script></body></html>`
+      },
+
+      {
+        naam: "Tekst aanpassen",
+        desc: "fontSize, fill, setOrigin",
+        uitleg: "De tekst heeft een <strong>stijlobject</strong> met opties zoals fontSize en fill. Met <strong>setOrigin(0.5)</strong> stel je het ankerpunt van het object in op het midden — zo centreert de tekst mooi op de opgegeven x-positie.",
+        blokken: [
+          {
+            label: "tekststijl opties — nieuw",
+            nieuw: true,
+            code:
+`<span class="fn">create</span>: <span class="kw">function</span>() {
+
+  <span class="cm">// Grote titel bovenaan</span>
+  <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">text</span>(<span class="num">250</span>, <span class="num">80</span>, <span class="str">'Mijn Spel'</span>, {
+    <span class="prop">fontSize</span>: <span class="str">'40px'</span>,      <span class="cm">// lettergrootte</span>
+    <span class="prop">fill</span>: <span class="str">'#a89fff'</span>,       <span class="cm">// kleur als CSS-hex</span>
+    <span class="prop">fontStyle</span>: <span class="str">'bold'</span>     <span class="cm">// 'bold', 'italic', ...</span>
+  }).<span class="fn">setOrigin</span>(<span class="num">0.5</span>);  <span class="cm">// 0 = links, 0.5 = midden, 1 = rechts</span>
+
+  <span class="cm">// Kleinere ondertitel</span>
+  <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">text</span>(<span class="num">250</span>, <span class="num">160</span>, <span class="str">'Druk op spatie om te starten'</span>, {
+    <span class="prop">fontSize</span>: <span class="str">'16px'</span>,
+    <span class="prop">fill</span>: <span class="str">'#9090a8'</span>
+  }).<span class="fn">setOrigin</span>(<span class="num">0.5</span>);
+
+  <span class="cm">// Tekst links uitlijnen (geen setOrigin)</span>
+  <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">text</span>(<span class="num">20</span>, <span class="num">260</span>, <span class="str">'Score: 0'</span>, {
+    <span class="prop">fontSize</span>: <span class="str">'14px'</span>, <span class="prop">fill</span>: <span class="str">'#ffd700'</span>
+  });
+
+}`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+const config = {
+  type: Phaser.AUTO, width: 500, height: 300,
+  backgroundColor: '#1a1a2e',
+  scene: {
+    create: function() {
+      this.add.text(250, 80, 'Mijn Spel', {
+        fontSize: '40px', fill: '#a89fff', fontStyle: 'bold'
+      }).setOrigin(0.5);
+      this.add.text(250, 160, 'Druk op spatie om te starten', {
+        fontSize: '16px', fill: '#9090a8'
+      }).setOrigin(0.5);
+      this.add.text(20, 260, 'Score: 0', {
+        fontSize: '14px', fill: '#ffd700'
+      });
+    }
+  }
+};
+new Phaser.Game(config);
+<\/script></body></html>`
+      },
+
+      {
+        naam: "Scene als aparte functie",
+        desc: "nettere code met functies",
+        uitleg: "Als je scene groeit, wordt alles in één object rommelig. Een betere aanpak: schrijf <strong>create als aparte functie</strong> en verwijs ernaar in de config. Zo blijft je code overzichtelijk.",
+        blokken: [
+          {
+            label: "aparte functie — nettere aanpak",
+            nieuw: true,
+            code:
+`<span class="cm">// Stap 1: schrijf de functie apart</span>
+<span class="kw">function</span> <span class="fn">maakSpel</span>() {
+  <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">text</span>(<span class="num">250</span>, <span class="num">80</span>, <span class="str">'Mijn Spel'</span>, {
+    <span class="prop">fontSize</span>: <span class="str">'40px'</span>, <span class="prop">fill</span>: <span class="str">'#a89fff'</span>, <span class="prop">fontStyle</span>: <span class="str">'bold'</span>
+  }).<span class="fn">setOrigin</span>(<span class="num">0.5</span>);
+
+  <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">text</span>(<span class="num">250</span>, <span class="num">160</span>, <span class="str">'Klaar voor het spel!'</span>, {
+    <span class="prop">fontSize</span>: <span class="str">'16px'</span>, <span class="prop">fill</span>: <span class="str">'#9090a8'</span>
+  }).<span class="fn">setOrigin</span>(<span class="num">0.5</span>);
+}
+
+<span class="cm">// Stap 2: verwijs ernaar in de config</span>
+<span class="kw">const</span> <span class="prop">config</span> = {
+  <span class="prop">type</span>: Phaser.AUTO,
+  <span class="prop">width</span>: <span class="num">500</span>, <span class="prop">height</span>: <span class="num">300</span>,
+  <span class="prop">backgroundColor</span>: <span class="str">'#1a1a2e'</span>,
+  <span class="prop">scene</span>: { <span class="fn">create</span>: <span class="fn">maakSpel</span> } <span class="cm">// ← verwijzing, geen aanroep!</span>
+};
+
+<span class="kw">new</span> <span class="fn">Phaser.Game</span>(config);`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+function maakSpel() {
+  this.add.text(250, 80, 'Mijn Spel', {
+    fontSize: '40px', fill: '#a89fff', fontStyle: 'bold'
+  }).setOrigin(0.5);
+  this.add.text(250, 160, 'Klaar voor het spel!', {
+    fontSize: '16px', fill: '#9090a8'
+  }).setOrigin(0.5);
+}
+const config = {
+  type: Phaser.AUTO, width: 500, height: 300,
+  backgroundColor: '#1a1a2e',
+  scene: { create: maakSpel }
+};
+new Phaser.Game(config);
+<\/script></body></html>`
+      }
+    ]
+  },
+
+  // ─── LES 3: VORMEN TEKENEN ───────────────────────────────
+  {
+    naam: "Vormen tekenen",
+    stappen: [
+      {
+        naam: "De basis opstellen",
+        desc: "config + leeg scherm",
+        uitleg: "We beginnen met het <strong>minimale skelet</strong> van elk Phaser-spel: een config-object met breedte, hoogte en achtergrondkleur, en een lege <strong>create()</strong> functie.",
+        blokken: [
+          {
+            label: "game.js",
+            nieuw: true,
+            code:
+`<span class="cm">// Stap 1: maak het config-object aan</span>
+<span class="kw">const</span> <span class="prop">config</span> = {
+  <span class="prop">type</span>: Phaser.AUTO,
+  <span class="prop">width</span>: <span class="num">500</span>,
+  <span class="prop">height</span>: <span class="num">300</span>,
+  <span class="prop">backgroundColor</span>: <span class="str">'#16213e'</span>,
+  <span class="prop">scene</span>: {
+    <span class="fn">create</span>: <span class="kw">function</span>() {
+      <span class="cm">// hier komt onze tekencode</span>
+    }
+  }
+};
+
+<span class="cm">// Stap 2: start het spel</span>
+<span class="kw">new</span> <span class="fn">Phaser.Game</span>(config);`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+const config = {
+  type: Phaser.AUTO, width: 500, height: 300,
+  backgroundColor: '#16213e',
+  scene: { create: function() {} }
+};
+new Phaser.Game(config);
+<\/script></body></html>`
+      },
+
+      {
+        naam: "Graphics-object aanmaken",
+        desc: "this.add.graphics()",
+        uitleg: "Om vormen te tekenen hebben we een <strong>Graphics-object</strong> nodig. Dit is een soort digitaal tekenblad. We slaan het op in een variabele zodat we er meerdere dingen op kunnen tekenen.",
+        blokken: [
+          {
+            label: "config (ongewijzigd)",
+            nieuw: false,
+            code:
+`<span class="kw">const</span> <span class="prop">config</span> = {
+  <span class="prop">type</span>: Phaser.AUTO,
+  <span class="prop">width</span>: <span class="num">500</span>, <span class="prop">height</span>: <span class="num">300</span>,
+  <span class="prop">backgroundColor</span>: <span class="str">'#16213e'</span>,
+  <span class="prop">scene</span>: { <span class="fn">create</span>: <span class="fn">tekenAlles</span> }
+};`
+          },
+          {
+            label: "tekenAlles() — nieuw",
+            nieuw: true,
+            code:
+`<span class="kw">function</span> <span class="fn">tekenAlles</span>() {
+
+  <span class="cm">// Maak een graphics-object aan</span>
+  <span class="cm">// Dit is ons "tekenblad"</span>
+  <span class="kw">const</span> <span class="prop">tekenblad</span> = <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">graphics</span>();
+
+  <span class="cm">// (we tekenen hier zo meteen iets op)</span>
+}`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+const config = {
+  type: Phaser.AUTO, width: 500, height: 300,
+  backgroundColor: '#16213e',
+  scene: { create: tekenAlles }
+};
+function tekenAlles() {
+  const tekenblad = this.add.graphics();
+}
+new Phaser.Game(config);
+<\/script></body></html>`
+      },
+
+      {
+        naam: "Kleur kiezen",
+        desc: "fillStyle(kleur)",
+        uitleg: "<strong>fillStyle()</strong> stelt de vulkleur in voor de volgende vorm. Kleuren schrijf je als <strong>0xRRGGBB</strong> — dat is hexadecimaal. Rood = 0xff0000, blauw = 0x0000ff, wit = 0xffffff.",
+        blokken: [
+          {
+            label: "tekenAlles() — tot nu toe",
+            nieuw: false,
+            code:
+`<span class="kw">function</span> <span class="fn">tekenAlles</span>() {
+  <span class="kw">const</span> <span class="prop">tekenblad</span> = <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">graphics</span>();`
+          },
+          {
+            label: "kleur instellen — nieuw",
+            nieuw: true,
+            code:
+`  <span class="cm">// Kies een vulkleur: 0xRRGGBB</span>
+  <span class="cm">// 0xe94560 = een rood-roze tint</span>
+  tekenblad.<span class="fn">fillStyle</span>(<span class="num">0xe94560</span>);
+
+}  <span class="cm">// einde tekenAlles</span>`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+const config = {
+  type: Phaser.AUTO, width: 500, height: 300,
+  backgroundColor: '#16213e',
+  scene: { create: tekenAlles }
+};
+function tekenAlles() {
+  const tekenblad = this.add.graphics();
+  tekenblad.fillStyle(0xe94560);
+}
+new Phaser.Game(config);
+<\/script></body></html>`
+      },
+
+      {
+        naam: "Een rechthoek tekenen",
+        desc: "fillRect(x, y, breedte, hoogte)",
+        uitleg: "<strong>fillRect(x, y, breedte, hoogte)</strong> tekent een gevulde rechthoek. x en y zijn de <strong>linkerbovenhoek</strong>. Onthoud: (0,0) is linksboven op het scherm, y groeit naar beneden.",
+        blokken: [
+          {
+            label: "tekenAlles() — tot nu toe",
+            nieuw: false,
+            code:
+`<span class="kw">function</span> <span class="fn">tekenAlles</span>() {
+  <span class="kw">const</span> <span class="prop">tekenblad</span> = <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">graphics</span>();
+  tekenblad.<span class="fn">fillStyle</span>(<span class="num">0xe94560</span>);`
+          },
+          {
+            label: "rechthoek tekenen — nieuw",
+            nieuw: true,
+            code:
+`  <span class="cm">// fillRect(x, y, breedte, hoogte)</span>
+  <span class="cm">// x=30, y=50, breedte=140, hoogte=80</span>
+  tekenblad.<span class="fn">fillRect</span>(<span class="num">30</span>, <span class="num">50</span>, <span class="num">140</span>, <span class="num">80</span>);
+
+}  <span class="cm">// einde tekenAlles</span>`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+const config = {
+  type: Phaser.AUTO, width: 500, height: 300,
+  backgroundColor: '#16213e',
+  scene: { create: tekenAlles }
+};
+function tekenAlles() {
+  const tekenblad = this.add.graphics();
+  tekenblad.fillStyle(0xe94560);
+  tekenblad.fillRect(30, 50, 140, 80);
+}
+new Phaser.Game(config);
+<\/script></body></html>`
+      },
+
+      {
+        naam: "Een cirkel toevoegen",
+        desc: "fillCircle(x, y, straal)",
+        uitleg: "<strong>fillCircle(x, y, straal)</strong> tekent een cirkel. x en y zijn het <strong>middelpunt</strong> van de cirkel — anders dan bij fillRect waar x,y de hoek is. Vergeet niet eerst een nieuwe fillStyle te kiezen voor een andere kleur!",
+        blokken: [
+          {
+            label: "tekenAlles() — tot nu toe",
+            nieuw: false,
+            code:
+`<span class="kw">function</span> <span class="fn">tekenAlles</span>() {
+  <span class="kw">const</span> <span class="prop">tekenblad</span> = <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">graphics</span>();
+  tekenblad.<span class="fn">fillStyle</span>(<span class="num">0xe94560</span>);
+  tekenblad.<span class="fn">fillRect</span>(<span class="num">30</span>, <span class="num">50</span>, <span class="num">140</span>, <span class="num">80</span>);`
+          },
+          {
+            label: "cirkel toevoegen — nieuw",
+            nieuw: true,
+            code:
+`  <span class="cm">// Nieuwe kleur voor de cirkel</span>
+  tekenblad.<span class="fn">fillStyle</span>(<span class="num">0x00d4ff</span>); <span class="cm">// lichtblauw</span>
+
+  <span class="cm">// fillCircle(middelpuntX, middelpuntY, straal)</span>
+  tekenblad.<span class="fn">fillCircle</span>(<span class="num">320</span>, <span class="num">150</span>, <span class="num">80</span>);
+
+}  <span class="cm">// einde tekenAlles</span>`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+const config = {
+  type: Phaser.AUTO, width: 500, height: 300,
+  backgroundColor: '#16213e',
+  scene: { create: tekenAlles }
+};
+function tekenAlles() {
+  const tekenblad = this.add.graphics();
+  tekenblad.fillStyle(0xe94560);
+  tekenblad.fillRect(30, 50, 140, 80);
+  tekenblad.fillStyle(0x00d4ff);
+  tekenblad.fillCircle(320, 150, 80);
+}
+new Phaser.Game(config);
+<\/script></body></html>`
+      },
+
+      {
+        naam: "Een lijn tekenen",
+        desc: "lineStyle + lineBetween",
+        uitleg: "Voor een lijn gebruik je <strong>twee</strong> functies samen: <strong>lineStyle(dikte, kleur)</strong> stelt de penlijn in, <strong>lineBetween(x1, y1, x2, y2)</strong> trekt de lijn van punt 1 naar punt 2.",
+        blokken: [
+          {
+            label: "tekenAlles() — tot nu toe",
+            nieuw: false,
+            code:
+`<span class="kw">function</span> <span class="fn">tekenAlles</span>() {
+  <span class="kw">const</span> <span class="prop">tekenblad</span> = <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">graphics</span>();
+  tekenblad.<span class="fn">fillStyle</span>(<span class="num">0xe94560</span>);
+  tekenblad.<span class="fn">fillRect</span>(<span class="num">30</span>, <span class="num">50</span>, <span class="num">140</span>, <span class="num">80</span>);
+  tekenblad.<span class="fn">fillStyle</span>(<span class="num">0x00d4ff</span>);
+  tekenblad.<span class="fn">fillCircle</span>(<span class="num">320</span>, <span class="num">150</span>, <span class="num">80</span>);`
+          },
+          {
+            label: "lijn tekenen — nieuw",
+            nieuw: true,
+            code:
+`  <span class="cm">// Stap 1: stel de lijnstijl in (dikte, kleur)</span>
+  tekenblad.<span class="fn">lineStyle</span>(<span class="num">5</span>, <span class="num">0xffd700</span>); <span class="cm">// goud, 5px dik</span>
+
+  <span class="cm">// Stap 2: trek de lijn van (x1,y1) naar (x2,y2)</span>
+  tekenblad.<span class="fn">lineBetween</span>(<span class="num">30</span>, <span class="num">260</span>, <span class="num">470</span>, <span class="num">260</span>);
+
+}  <span class="cm">// einde tekenAlles</span>`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+const config = {
+  type: Phaser.AUTO, width: 500, height: 300,
+  backgroundColor: '#16213e',
+  scene: { create: tekenAlles }
+};
+function tekenAlles() {
+  const tekenblad = this.add.graphics();
+  tekenblad.fillStyle(0xe94560);
+  tekenblad.fillRect(30, 50, 140, 80);
+  tekenblad.fillStyle(0x00d4ff);
+  tekenblad.fillCircle(320, 150, 80);
+  tekenblad.lineStyle(5, 0xffd700);
+  tekenblad.lineBetween(30, 260, 470, 260);
+}
+new Phaser.Game(config);
+<\/script></body></html>`
+      },
+
+      {
+        naam: "Tekst toevoegen",
+        desc: "this.add.text()",
+        uitleg: "Met <strong>this.add.text(x, y, tekst, stijl)</strong> voeg je een tekstlabel toe. Met <strong>.setOrigin(0.5)</strong> centreer je de tekst op zijn eigen middelpunt — handig voor titels.",
+        blokken: [
+          {
+            label: "tekenAlles() — tot nu toe",
+            nieuw: false,
+            code:
+`<span class="kw">function</span> <span class="fn">tekenAlles</span>() {
+  <span class="kw">const</span> <span class="prop">tekenblad</span> = <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">graphics</span>();
+  tekenblad.<span class="fn">fillStyle</span>(<span class="num">0xe94560</span>);
+  tekenblad.<span class="fn">fillRect</span>(<span class="num">30</span>, <span class="num">50</span>, <span class="num">140</span>, <span class="num">80</span>);
+  tekenblad.<span class="fn">fillStyle</span>(<span class="num">0x00d4ff</span>);
+  tekenblad.<span class="fn">fillCircle</span>(<span class="num">320</span>, <span class="num">150</span>, <span class="num">80</span>);
+  tekenblad.<span class="fn">lineStyle</span>(<span class="num">5</span>, <span class="num">0xffd700</span>);
+  tekenblad.<span class="fn">lineBetween</span>(<span class="num">30</span>, <span class="num">260</span>, <span class="num">470</span>, <span class="num">260</span>);`
+          },
+          {
+            label: "tekst toevoegen — nieuw",
+            nieuw: true,
+            code:
+`  <span class="cm">// add.text(x, y, inhoud, stijlobject)</span>
+  <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">text</span>(<span class="num">250</span>, <span class="num">18</span>, <span class="str">'Mijn eerste tekening!'</span>, {
+    <span class="prop">fontSize</span>: <span class="str">'18px'</span>,
+    <span class="prop">fill</span>: <span class="str">'#ffffff'</span>
+  }).<span class="fn">setOrigin</span>(<span class="num">0.5</span>); <span class="cm">// gecentreerd op x=250</span>
+
+}  <span class="cm">// einde tekenAlles</span>`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+const config = {
+  type: Phaser.AUTO, width: 500, height: 300,
+  backgroundColor: '#16213e',
+  scene: { create: tekenAlles }
+};
+function tekenAlles() {
+  const tekenblad = this.add.graphics();
+  tekenblad.fillStyle(0xe94560);
+  tekenblad.fillRect(30, 50, 140, 80);
+  tekenblad.fillStyle(0x00d4ff);
+  tekenblad.fillCircle(320, 150, 80);
+  tekenblad.lineStyle(5, 0xffd700);
+  tekenblad.lineBetween(30, 260, 470, 260);
+  this.add.text(250, 18, 'Mijn eerste tekening!', {
+    fontSize: '18px', fill: '#ffffff'
+  }).setOrigin(0.5);
+}
+new Phaser.Game(config);
+<\/script></body></html>`
+      }
+    ]
+  },
+
+  // ─── LES 4: BEWEGING ─────────────────────────────────────
+  {
+    naam: "Beweging",
+    stappen: [
+      {
+        naam: "Object aanmaken",
+        desc: "cirkel + container",
+        uitleg: "We starten met een <strong>Container</strong> — dat is een object met een x/y positie dat we later kunnen verplaatsen. We tekenen een cirkel erin als onze 'bal'. De cirkel zelf staat op (0,0) <em>binnen</em> de container.",
+        blokken: [
+          {
+            label: "game.js — begin",
+            nieuw: true,
+            code:
+`<span class="kw">let</span> <span class="prop">bal</span>; <span class="cm">// variabele buiten create() zodat update() er aan kan</span>
+
+<span class="kw">const</span> <span class="prop">config</span> = {
+  <span class="prop">type</span>: Phaser.AUTO,
+  <span class="prop">width</span>: <span class="num">500</span>, <span class="prop">height</span>: <span class="num">300</span>,
+  <span class="prop">backgroundColor</span>: <span class="str">'#1a1a2e'</span>,
+  <span class="prop">scene</span>: { <span class="fn">create</span>: <span class="fn">maakSpel</span> }
+};
+
+<span class="kw">function</span> <span class="fn">maakSpel</span>() {
+  <span class="cm">// Teken een cirkel op positie (0,0)</span>
+  <span class="kw">const</span> <span class="prop">cirkel</span> = <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">graphics</span>();
+  cirkel.<span class="fn">fillStyle</span>(<span class="num">0xe94560</span>);
+  cirkel.<span class="fn">fillCircle</span>(<span class="num">0</span>, <span class="num">0</span>, <span class="num">22</span>);
+
+  <span class="cm">// Container = verplaatsbaar object op positie (250, 150)</span>
+  bal = <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">container</span>(<span class="num">250</span>, <span class="num">150</span>, [cirkel]);
+}
+
+<span class="kw">new</span> <span class="fn">Phaser.Game</span>(config);`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+let bal;
+const config = {
+  type: Phaser.AUTO, width: 500, height: 300,
+  backgroundColor: '#1a1a2e',
+  scene: { create: maakSpel }
+};
+function maakSpel() {
+  const cirkel = this.add.graphics();
+  cirkel.fillStyle(0xe94560);
+  cirkel.fillCircle(0, 0, 22);
+  bal = this.add.container(250, 150, [cirkel]);
+}
+new Phaser.Game(config);
+<\/script></body></html>`
+      },
+
+      {
+        naam: "Snelheid toevoegen",
+        desc: "variabelen snelheidX en snelheidY",
+        uitleg: "We voegen twee <strong>variabelen</strong> toe die bijhouden hoe snel de bal beweegt in de x- en y-richting. Positief = naar rechts / naar beneden. Negatief = naar links / naar boven.",
+        blokken: [
+          {
+            label: "bovenaan het bestand — nieuw",
+            nieuw: true,
+            code:
+`<span class="kw">let</span> <span class="prop">bal</span>;
+
+<span class="cm">// Snelheid in pixels per frame</span>
+<span class="kw">let</span> <span class="prop">snelheidX</span> = <span class="num">3</span>;  <span class="cm">// 3 pixels naar rechts per frame</span>
+<span class="kw">let</span> <span class="prop">snelheidY</span> = <span class="num">2</span>;  <span class="cm">// 2 pixels naar beneden per frame</span>`
+          },
+          {
+            label: "config + maakSpel() (ongewijzigd)",
+            nieuw: false,
+            code:
+`<span class="kw">const</span> <span class="prop">config</span> = {
+  <span class="prop">type</span>: Phaser.AUTO, <span class="prop">width</span>: <span class="num">500</span>, <span class="prop">height</span>: <span class="num">300</span>,
+  <span class="prop">backgroundColor</span>: <span class="str">'#1a1a2e'</span>,
+  <span class="prop">scene</span>: { <span class="fn">create</span>: <span class="fn">maakSpel</span> }
+};
+
+<span class="kw">function</span> <span class="fn">maakSpel</span>() {
+  <span class="kw">const</span> <span class="prop">cirkel</span> = <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">graphics</span>();
+  cirkel.<span class="fn">fillStyle</span>(<span class="num">0xe94560</span>);
+  cirkel.<span class="fn">fillCircle</span>(<span class="num">0</span>, <span class="num">0</span>, <span class="num">22</span>);
+  bal = <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">container</span>(<span class="num">250</span>, <span class="num">150</span>, [cirkel]);
+}`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+let bal;
+let snelheidX = 3;
+let snelheidY = 2;
+const config = {
+  type: Phaser.AUTO, width: 500, height: 300,
+  backgroundColor: '#1a1a2e',
+  scene: { create: maakSpel }
+};
+function maakSpel() {
+  const cirkel = this.add.graphics();
+  cirkel.fillStyle(0xe94560);
+  cirkel.fillCircle(0, 0, 22);
+  bal = this.add.container(250, 150, [cirkel]);
+}
+new Phaser.Game(config);
+<\/script></body></html>`
+      },
+
+      {
+        naam: "update() toevoegen",
+        desc: "positie aanpassen elk frame",
+        uitleg: "Nu voegen we <strong>update()</strong> toe aan de scene. Elke frame tellen we snelheidX op bij bal.x en snelheidY bij bal.y. Zo schuift de bal elke frame een klein stukje op — en lijkt het te bewegen!",
+        blokken: [
+          {
+            label: "config — update toegevoegd",
+            nieuw: true,
+            code:
+`<span class="kw">const</span> <span class="prop">config</span> = {
+  <span class="prop">type</span>: Phaser.AUTO, <span class="prop">width</span>: <span class="num">500</span>, <span class="prop">height</span>: <span class="num">300</span>,
+  <span class="prop">backgroundColor</span>: <span class="str">'#1a1a2e'</span>,
+  <span class="prop">scene</span>: {
+    <span class="fn">create</span>: <span class="fn">maakSpel</span>,
+    <span class="fn">update</span>: <span class="fn">updateSpel</span>   <span class="cm">// ← nieuw!</span>
+  }
+};`
+          },
+          {
+            label: "updateSpel() — nieuw",
+            nieuw: true,
+            code:
+`<span class="kw">function</span> <span class="fn">updateSpel</span>() {
+  <span class="cm">// Verplaats de bal elke frame</span>
+  bal.x = bal.x + <span class="prop">snelheidX</span>;
+  bal.y = bal.y + <span class="prop">snelheidY</span>;
+}
+
+<span class="kw">new</span> <span class="fn">Phaser.Game</span>(config);`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+let bal;
+let snelheidX = 3;
+let snelheidY = 2;
+const config = {
+  type: Phaser.AUTO, width: 500, height: 300,
+  backgroundColor: '#1a1a2e',
+  scene: { create: maakSpel, update: updateSpel }
+};
+function maakSpel() {
+  const cirkel = this.add.graphics();
+  cirkel.fillStyle(0xe94560);
+  cirkel.fillCircle(0, 0, 22);
+  bal = this.add.container(250, 150, [cirkel]);
+}
+function updateSpel() {
+  bal.x = bal.x + snelheidX;
+  bal.y = bal.y + snelheidY;
+}
+new Phaser.Game(config);
+<\/script></body></html>`
+      },
+
+      {
+        naam: "Stuiten op de randen",
+        desc: "richting omdraaien met * -1",
+        uitleg: "De bal vliegt nu buiten het scherm. We controleren of de bal de rand bereikt, en draaien dan de <strong>richting om</strong> door de snelheid te vermenigvuldigen met -1. Positief wordt negatief en andersom.",
+        blokken: [
+          {
+            label: "updateSpel() — tot nu toe",
+            nieuw: false,
+            code:
+`<span class="kw">function</span> <span class="fn">updateSpel</span>() {
+  bal.x = bal.x + <span class="prop">snelheidX</span>;
+  bal.y = bal.y + <span class="prop">snelheidY</span>;`
+          },
+          {
+            label: "randcontrole — nieuw",
+            nieuw: true,
+            code:
+`  <span class="cm">// Linker- of rechterrand geraakt?</span>
+  <span class="kw">if</span> (bal.x > <span class="num">478</span> || bal.x < <span class="num">22</span>) {
+    <span class="prop">snelheidX</span> = <span class="prop">snelheidX</span> * <span class="num">-1</span>; <span class="cm">// draai richting om</span>
+  }
+
+  <span class="cm">// Boven- of onderrand geraakt?</span>
+  <span class="kw">if</span> (bal.y > <span class="num">278</span> || bal.y < <span class="num">22</span>) {
+    <span class="prop">snelheidY</span> = <span class="prop">snelheidY</span> * <span class="num">-1</span>; <span class="cm">// draai richting om</span>
+  }
+}  <span class="cm">// einde updateSpel</span>`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+let bal;
+let snelheidX = 3;
+let snelheidY = 2;
+const config = {
+  type: Phaser.AUTO, width: 500, height: 300,
+  backgroundColor: '#1a1a2e',
+  scene: { create: maakSpel, update: updateSpel }
+};
+function maakSpel() {
+  const cirkel = this.add.graphics();
+  cirkel.fillStyle(0xe94560);
+  cirkel.fillCircle(0, 0, 22);
+  bal = this.add.container(250, 150, [cirkel]);
+}
+function updateSpel() {
+  bal.x = bal.x + snelheidX;
+  bal.y = bal.y + snelheidY;
+  if (bal.x > 478 || bal.x < 22) { snelheidX = snelheidX * -1; }
+  if (bal.y > 278 || bal.y < 22) { snelheidY = snelheidY * -1; }
+}
+new Phaser.Game(config);
+<\/script></body></html>`
+      },
+
+      {
+        naam: "Snelheid tonen",
+        desc: "scorebord met tekst",
+        uitleg: "Als finishing touch voegen we een <strong>informatietekst</strong> toe die de huidige snelheidswaardes toont. We bewaren de tekst in een variabele zodat we die in update() kunnen bijwerken.",
+        blokken: [
+          {
+            label: "maakSpel() — info toevoegen",
+            nieuw: true,
+            code:
+`<span class="cm">// variabele voor de infotekst</span>
+<span class="kw">let</span> <span class="prop">infoTekst</span>;
+
+<span class="kw">function</span> <span class="fn">maakSpel</span>() {
+  <span class="kw">const</span> <span class="prop">cirkel</span> = <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">graphics</span>();
+  cirkel.<span class="fn">fillStyle</span>(<span class="num">0xe94560</span>);
+  cirkel.<span class="fn">fillCircle</span>(<span class="num">0</span>, <span class="num">0</span>, <span class="num">22</span>);
+  bal = <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">container</span>(<span class="num">250</span>, <span class="num">150</span>, [cirkel]);
+
+  <span class="cm">// Infotekst linksboven</span>
+  infoTekst = <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">text</span>(<span class="num">10</span>, <span class="num">10</span>, <span class="str">''</span>, {
+    <span class="prop">fontSize</span>: <span class="str">'14px'</span>, <span class="prop">fill</span>: <span class="str">'#aaaacc'</span>,
+    <span class="prop">fontFamily</span>: <span class="str">'monospace'</span>
+  });
+}`
+          },
+          {
+            label: "updateSpel() — tekst bijwerken",
+            nieuw: true,
+            code:
+`<span class="kw">function</span> <span class="fn">updateSpel</span>() {
+  bal.x = bal.x + <span class="prop">snelheidX</span>;
+  bal.y = bal.y + <span class="prop">snelheidY</span>;
+  <span class="kw">if</span> (bal.x > <span class="num">478</span> || bal.x < <span class="num">22</span>) { <span class="prop">snelheidX</span> *= <span class="num">-1</span>; }
+  <span class="kw">if</span> (bal.y > <span class="num">278</span> || bal.y < <span class="num">22</span>) { <span class="prop">snelheidY</span> *= <span class="num">-1</span>; }
+
+  <span class="cm">// Bijwerken: Math.round() voor nette getallen</span>
+  infoTekst.<span class="fn">setText</span>(
+    <span class="str">'x: '</span> + Math.<span class="fn">round</span>(bal.x) +
+    <span class="str">'  y: '</span> + Math.<span class="fn">round</span>(bal.y) +
+    <span class="str">'  snelheid: '</span> + <span class="prop">snelheidX</span> + <span class="str">' / '</span> + <span class="prop">snelheidY</span>
+  );
+}`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+let bal, infoTekst;
+let snelheidX = 3;
+let snelheidY = 2;
+const config = {
+  type: Phaser.AUTO, width: 500, height: 300,
+  backgroundColor: '#1a1a2e',
+  scene: { create: maakSpel, update: updateSpel }
+};
+function maakSpel() {
+  const cirkel = this.add.graphics();
+  cirkel.fillStyle(0xe94560);
+  cirkel.fillCircle(0, 0, 22);
+  bal = this.add.container(250, 150, [cirkel]);
+  infoTekst = this.add.text(10, 10, '', {
+    fontSize: '14px', fill: '#aaaacc', fontFamily: 'monospace'
+  });
+}
+function updateSpel() {
+  bal.x = bal.x + snelheidX;
+  bal.y = bal.y + snelheidY;
+  if (bal.x > 478 || bal.x < 22) { snelheidX *= -1; }
+  if (bal.y > 278 || bal.y < 22) { snelheidY *= -1; }
+  infoTekst.setText('x: ' + Math.round(bal.x) + '  y: ' + Math.round(bal.y) + '  snelheid: ' + snelheidX + ' / ' + snelheidY);
+}
+new Phaser.Game(config);
+<\/script></body></html>`
+      }
+    ]
+  },
+
+  // ─── LES 5: ARCADE PHYSICS ───────────────────────────────
+  {
+    naam: "Arcade Physics",
+    stappen: [
+      {
+        naam: "Physics inschakelen",
+        desc: "physics in de config",
+        uitleg: "Tot nu toe bewogen we objecten handmatig. Met <strong>Arcade Physics</strong> doet Phaser dat werk: zwaartekracht, botsen en snelheid worden automatisch berekend. Je schakelt het in via de config.",
+        blokken: [
+          {
+            label: "config — physics toevoegen",
+            nieuw: true,
+            code:
+`<span class="kw">const</span> <span class="prop">config</span> = {
+  <span class="prop">type</span>: Phaser.AUTO,
+  <span class="prop">width</span>: <span class="num">500</span>, <span class="prop">height</span>: <span class="num">300</span>,
+  <span class="prop">backgroundColor</span>: <span class="str">'#1a1a2e'</span>,
+
+  <span class="cm">// Voeg een physics-blok toe aan de config</span>
+  <span class="prop">physics</span>: {
+    <span class="prop">default</span>: <span class="str">'arcade'</span>,    <span class="cm">// gebruik Arcade Physics</span>
+    <span class="prop">arcade</span>: {
+      <span class="prop">gravity</span>: { <span class="prop">y</span>: <span class="num">400</span> }, <span class="cm">// zwaartekracht naar beneden</span>
+      <span class="prop">debug</span>: <span class="kw">false</span>         <span class="cm">// true = hitboxen zichtbaar</span>
+    }
+  },
+
+  <span class="prop">scene</span>: { <span class="fn">create</span>: <span class="fn">maakSpel</span>, <span class="fn">update</span>: <span class="fn">updateSpel</span> }
+};`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body style="background:#0e0e14;margin:0;font-family:monospace;display:flex;align-items:center;justify-content:center;height:100vh;">
+<div style="color:#e8e8f0;max-width:420px;text-align:center;">
+  <p style="color:#9090a8;font-size:13px;margin-bottom:1.5rem;">Arcade Physics geeft je drie krachtige tools:</p>
+  <div style="display:flex;flex-direction:column;gap:8px;text-align:left;">
+    <div style="background:#16161f;border:1px solid #f5a623;border-radius:8px;padding:12px 14px;">
+      <div style="color:#f5a623;font-size:12px;font-weight:700;margin-bottom:4px;">ZWAARTEKRACHT</div>
+      <div style="color:#9090a8;font-size:12px;line-height:1.5;">Objecten vallen automatisch naar beneden. Instelbaar via gravity.y.</div>
+    </div>
+    <div style="background:#16161f;border:1px solid #3ecf8e;border-radius:8px;padding:12px 14px;">
+      <div style="color:#3ecf8e;font-size:12px;font-weight:700;margin-bottom:4px;">COLLIDER</div>
+      <div style="color:#9090a8;font-size:12px;line-height:1.5;">Objecten botsen en stoppen bij aanraking. Nooit meer door muren lopen.</div>
+    </div>
+    <div style="background:#16161f;border:1px solid #a89fff;border-radius:8px;padding:12px 14px;">
+      <div style="color:#a89fff;font-size:12px;font-weight:700;margin-bottom:4px;">VELOCITY</div>
+      <div style="color:#9090a8;font-size:12px;line-height:1.5;">Snelheid in pixels/seconde. setVelocityX(200) = 200px/s naar rechts.</div>
+    </div>
+  </div>
+</div>
+</body></html>`
+      },
+
+      {
+        naam: "Een physics-object maken",
+        desc: "physics.add.image()",
+        uitleg: "Een gewoon object zoals <code>this.add.image()</code> kent geen physics. Je moet <strong>this.physics.add.image()</strong> of <strong>this.physics.add.sprite()</strong> gebruiken — dan krijgt het object automatisch zwaartekracht en een hitbox.",
+        blokken: [
+          {
+            label: "config (ongewijzigd)",
+            nieuw: false,
+            code:
+`<span class="kw">const</span> <span class="prop">config</span> = {
+  <span class="prop">type</span>: Phaser.AUTO, <span class="prop">width</span>: <span class="num">500</span>, <span class="prop">height</span>: <span class="num">300</span>,
+  <span class="prop">backgroundColor</span>: <span class="str">'#1a1a2e'</span>,
+  <span class="prop">physics</span>: {
+    <span class="prop">default</span>: <span class="str">'arcade'</span>,
+    <span class="prop">arcade</span>: { <span class="prop">gravity</span>: { <span class="prop">y</span>: <span class="num">400</span> }, <span class="prop">debug</span>: <span class="kw">false</span> }
+  },
+  <span class="prop">scene</span>: { <span class="fn">create</span>: <span class="fn">maakSpel</span>, <span class="fn">update</span>: <span class="fn">updateSpel</span> }
+};`
+          },
+          {
+            label: "maakSpel() — physics object",
+            nieuw: true,
+            code:
+`<span class="kw">let</span> <span class="prop">blok</span>;
+
+<span class="kw">function</span> <span class="fn">maakSpel</span>() {
+  <span class="cm">// Maak een rechthoek als texture</span>
+  <span class="kw">const</span> <span class="prop">grafiek</span> = <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">graphics</span>();
+  grafiek.<span class="fn">fillStyle</span>(<span class="num">0xe94560</span>);
+  grafiek.<span class="fn">fillRect</span>(<span class="num">0</span>, <span class="num">0</span>, <span class="num">40</span>, <span class="num">40</span>);
+  grafiek.<span class="fn">generateTexture</span>(<span class="str">'blok'</span>, <span class="num">40</span>, <span class="num">40</span>);
+  grafiek.<span class="fn">destroy</span>(); <span class="cm">// grafiek zelf niet meer nodig</span>
+
+  <span class="cm">// physics.add.image → object met zwaartekracht!</span>
+  blok = <span class="kw">this</span>.<span class="prop">physics</span>.<span class="prop">add</span>.<span class="fn">image</span>(<span class="num">250</span>, <span class="num">50</span>, <span class="str">'blok'</span>);
+}
+
+<span class="kw">function</span> <span class="fn">updateSpel</span>() {} <span class="cm">// later invullen</span>`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+let blok;
+const config = {
+  type: Phaser.AUTO, width: 500, height: 300,
+  backgroundColor: '#1a1a2e',
+  physics: { default: 'arcade', arcade: { gravity: { y: 400 }, debug: false } },
+  scene: { create: maakSpel, update: updateSpel }
+};
+function maakSpel() {
+  const grafiek = this.add.graphics();
+  grafiek.fillStyle(0xe94560);
+  grafiek.fillRect(0, 0, 40, 40);
+  grafiek.generateTexture('blok', 40, 40);
+  grafiek.destroy();
+  blok = this.physics.add.image(250, 50, 'blok');
+}
+function updateSpel() {}
+new Phaser.Game(config);
+<\/script></body></html>`
+      },
+
+      {
+        naam: "Een platform toevoegen",
+        desc: "staticGroup als vloer",
+        uitleg: "Een <strong>staticGroup</strong> is een groep objecten die <em>niet</em> bewegen — perfect voor vloeren en platforms. We maken eerst een texture via graphics, dan het platform als statisch physics-object.",
+        blokken: [
+          {
+            label: "maakSpel() — platform toevoegen",
+            nieuw: true,
+            code:
+`<span class="kw">let</span> <span class="prop">blok</span>, <span class="prop">platform</span>;
+
+<span class="kw">function</span> <span class="fn">maakSpel</span>() {
+  <span class="cm">// Blok-texture (rood vierkant)</span>
+  <span class="kw">const</span> <span class="prop">g1</span> = <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">graphics</span>();
+  g1.<span class="fn">fillStyle</span>(<span class="num">0xe94560</span>);
+  g1.<span class="fn">fillRect</span>(<span class="num">0</span>, <span class="num">0</span>, <span class="num">40</span>, <span class="num">40</span>);
+  g1.<span class="fn">generateTexture</span>(<span class="str">'blok'</span>, <span class="num">40</span>, <span class="num">40</span>); g1.<span class="fn">destroy</span>();
+
+  <span class="cm">// Platform-texture (groen rechthoek)</span>
+  <span class="kw">const</span> <span class="prop">g2</span> = <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">graphics</span>();
+  g2.<span class="fn">fillStyle</span>(<span class="num">0x3ecf8e</span>);
+  g2.<span class="fn">fillRect</span>(<span class="num">0</span>, <span class="num">0</span>, <span class="num">500</span>, <span class="num">20</span>);
+  g2.<span class="fn">generateTexture</span>(<span class="str">'vloer'</span>, <span class="num">500</span>, <span class="num">20</span>); g2.<span class="fn">destroy</span>();
+
+  <span class="cm">// Vallend blok</span>
+  blok = <span class="kw">this</span>.<span class="prop">physics</span>.<span class="prop">add</span>.<span class="fn">image</span>(<span class="num">250</span>, <span class="num">30</span>, <span class="str">'blok'</span>);
+
+  <span class="cm">// Statisch platform (beweegt niet)</span>
+  platform = <span class="kw">this</span>.<span class="prop">physics</span>.<span class="prop">add</span>.<span class="fn">staticImage</span>(<span class="num">250</span>, <span class="num">280</span>, <span class="str">'vloer'</span>);
+}`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+let blok, platform;
+const config = {
+  type: Phaser.AUTO, width: 500, height: 300,
+  backgroundColor: '#1a1a2e',
+  physics: { default: 'arcade', arcade: { gravity: { y: 400 }, debug: false } },
+  scene: { create: maakSpel, update: updateSpel }
+};
+function maakSpel() {
+  const g1 = this.add.graphics();
+  g1.fillStyle(0xe94560); g1.fillRect(0,0,40,40);
+  g1.generateTexture('blok',40,40); g1.destroy();
+  const g2 = this.add.graphics();
+  g2.fillStyle(0x3ecf8e); g2.fillRect(0,0,500,20);
+  g2.generateTexture('vloer',500,20); g2.destroy();
+  blok = this.physics.add.image(250, 30, 'blok');
+  platform = this.physics.add.staticImage(250, 280, 'vloer');
+}
+function updateSpel() {}
+new Phaser.Game(config);
+<\/script></body></html>`
+      },
+
+      {
+        naam: "Collider toevoegen",
+        desc: "physics.add.collider()",
+        uitleg: "Het blok valt nu door het platform heen. Met <strong>physics.add.collider()</strong> vertel je Phaser welke objecten moeten botsen. Één regel code — Phaser doet alle berekeningen automatisch.",
+        blokken: [
+          {
+            label: "maakSpel() — tot nu toe",
+            nieuw: false,
+            code:
+`<span class="kw">function</span> <span class="fn">maakSpel</span>() {
+  <span class="cm">// ... textures en objecten aanmaken ...</span>
+  blok = <span class="kw">this</span>.<span class="prop">physics</span>.<span class="prop">add</span>.<span class="fn">image</span>(<span class="num">250</span>, <span class="num">30</span>, <span class="str">'blok'</span>);
+  platform = <span class="kw">this</span>.<span class="prop">physics</span>.<span class="prop">add</span>.<span class="fn">staticImage</span>(<span class="num">250</span>, <span class="num">280</span>, <span class="str">'vloer'</span>);`
+          },
+          {
+            label: "collider toevoegen — nieuw",
+            nieuw: true,
+            code:
+`  <span class="cm">// Laat blok en platform botsen</span>
+  <span class="cm">// physics.add.collider(objectA, objectB)</span>
+  <span class="kw">this</span>.<span class="prop">physics</span>.<span class="prop">add</span>.<span class="fn">collider</span>(blok, platform);
+
+  <span class="cm">// Optioneel: stuiterkracht instellen</span>
+  blok.<span class="fn">setBounce</span>(<span class="num">0.5</span>); <span class="cm">// 0 = geen stuit, 1 = volledig</span>
+}`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+let blok, platform;
+const config = {
+  type: Phaser.AUTO, width: 500, height: 300,
+  backgroundColor: '#1a1a2e',
+  physics: { default: 'arcade', arcade: { gravity: { y: 400 }, debug: false } },
+  scene: { create: maakSpel, update: updateSpel }
+};
+function maakSpel() {
+  const g1 = this.add.graphics();
+  g1.fillStyle(0xe94560); g1.fillRect(0,0,40,40);
+  g1.generateTexture('blok',40,40); g1.destroy();
+  const g2 = this.add.graphics();
+  g2.fillStyle(0x3ecf8e); g2.fillRect(0,0,500,20);
+  g2.generateTexture('vloer',500,20); g2.destroy();
+  blok = this.physics.add.image(250, 30, 'blok');
+  platform = this.physics.add.staticImage(250, 280, 'vloer');
+  this.physics.add.collider(blok, platform);
+  blok.setBounce(0.5);
+}
+function updateSpel() {}
+new Phaser.Game(config);
+<\/script></body></html>`
+      },
+
+      {
+        naam: "Velocity gebruiken",
+        desc: "setVelocityX en setVelocityY",
+        uitleg: "In plaats van x en y handmatig aan te passen, gebruik je bij physics-objecten <strong>setVelocity</strong>. Snelheid is in <em>pixels per seconde</em> — dus setVelocityX(200) = 200px per seconde naar rechts, ongeacht de framerate.",
+        blokken: [
+          {
+            label: "maakSpel() — velocity bij aanvang",
+            nieuw: true,
+            code:
+`<span class="kw">function</span> <span class="fn">maakSpel</span>() {
+  <span class="cm">// ... setup code ...</span>
+  blok = <span class="kw">this</span>.<span class="prop">physics</span>.<span class="prop">add</span>.<span class="fn">image</span>(<span class="num">250</span>, <span class="num">30</span>, <span class="str">'blok'</span>);
+  platform = <span class="kw">this</span>.<span class="prop">physics</span>.<span class="prop">add</span>.<span class="fn">staticImage</span>(<span class="num">250</span>, <span class="num">280</span>, <span class="str">'vloer'</span>);
+  <span class="kw">this</span>.<span class="prop">physics</span>.<span class="prop">add</span>.<span class="fn">collider</span>(blok, platform);
+  blok.<span class="fn">setBounce</span>(<span class="num">0.4</span>);
+
+  <span class="cm">// Geef het blok een startsnelheid mee</span>
+  blok.<span class="fn">setVelocityX</span>(<span class="num">150</span>);  <span class="cm">// 150px/s naar rechts</span>
+
+  <span class="cm">// Zorg dat het blok binnen het scherm blijft</span>
+  blok.<span class="fn">setCollideWorldBounds</span>(<span class="kw">true</span>);
+  blok.<span class="fn">setBounce</span>(<span class="num">0.6</span>);   <span class="cm">// ook stuiten op de randen</span>
+}`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+let blok, platform;
+const config = {
+  type: Phaser.AUTO, width: 500, height: 300,
+  backgroundColor: '#1a1a2e',
+  physics: { default: 'arcade', arcade: { gravity: { y: 400 }, debug: false } },
+  scene: { create: maakSpel, update: updateSpel }
+};
+function maakSpel() {
+  const g1 = this.add.graphics();
+  g1.fillStyle(0xe94560); g1.fillRect(0,0,40,40);
+  g1.generateTexture('blok',40,40); g1.destroy();
+  const g2 = this.add.graphics();
+  g2.fillStyle(0x3ecf8e); g2.fillRect(0,0,500,20);
+  g2.generateTexture('vloer',500,20); g2.destroy();
+  blok = this.physics.add.image(250, 30, 'blok');
+  platform = this.physics.add.staticImage(250, 280, 'vloer');
+  this.physics.add.collider(blok, platform);
+  blok.setVelocityX(150);
+  blok.setCollideWorldBounds(true);
+  blok.setBounce(0.6);
+}
+function updateSpel() {}
+new Phaser.Game(config);
+<\/script></body></html>`
+      },
+
+      {
+        naam: "Debug-modus",
+        desc: "hitboxen zichtbaar maken",
+        uitleg: "Als je wil zien wat Phaser 'ziet' — de hitboxen van objecten — zet je <strong>debug: true</strong> in de physics-config. Je ziet groene kaders rond elk physics-object. Handig bij het oplossen van problemen!",
+        blokken: [
+          {
+            label: "physics config — debug aan",
+            nieuw: true,
+            code:
+`<span class="prop">physics</span>: {
+  <span class="prop">default</span>: <span class="str">'arcade'</span>,
+  <span class="prop">arcade</span>: {
+    <span class="prop">gravity</span>: { <span class="prop">y</span>: <span class="num">400</span> },
+    <span class="prop">debug</span>: <span class="kw">true</span>   <span class="cm">// ← zet op true om hitboxen te zien</span>
+  }
+},`
+          },
+          {
+            label: "wat zie je in debug-modus?",
+            nieuw: false,
+            code:
+`<span class="cm">// Groene rechthoek = hitbox van een dynamisch object</span>
+<span class="cm">// Rode/oranje rechthoek = hitbox van een static object</span>
+<span class="cm">// Gekleurde pijl = richting en snelheid (velocity)</span>
+
+<span class="cm">// Zet debug altijd terug op false</span>
+<span class="cm">// voor je het spel deelt met anderen!</span>`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+let blok, platform;
+const config = {
+  type: Phaser.AUTO, width: 500, height: 300,
+  backgroundColor: '#1a1a2e',
+  physics: { default: 'arcade', arcade: { gravity: { y: 400 }, debug: true } },
+  scene: { create: maakSpel, update: updateSpel }
+};
+function maakSpel() {
+  const g1 = this.add.graphics();
+  g1.fillStyle(0xe94560); g1.fillRect(0,0,40,40);
+  g1.generateTexture('blok',40,40); g1.destroy();
+  const g2 = this.add.graphics();
+  g2.fillStyle(0x3ecf8e); g2.fillRect(0,0,500,20);
+  g2.generateTexture('vloer',500,20); g2.destroy();
+  blok = this.physics.add.image(250, 30, 'blok');
+  platform = this.physics.add.staticImage(250, 280, 'vloer');
+  this.physics.add.collider(blok, platform);
+  blok.setVelocityX(150);
+  blok.setCollideWorldBounds(true);
+  blok.setBounce(0.6);
+}
+function updateSpel() {}
+new Phaser.Game(config);
+<\/script></body></html>`
+      }
+    ]
+  },
+
+  // ─── LES 6: TOETSENBORD ──────────────────────────────────
+  {
+    naam: "Toetsenbord",
+    stappen: [
+      {
+        naam: "createCursorKeys()",
+        desc: "pijltjestoetsen klaarzetten",
+        uitleg: "<strong>createCursorKeys()</strong> geeft je een object met vijf toetsen: left, right, up, down en space. Je roept dit aan in <strong>create()</strong> en slaat het op in een variabele zodat update() er bij kan.",
+        blokken: [
+          {
+            label: "create() — toetsen registreren",
+            nieuw: true,
+            code:
+`<span class="kw">let</span> <span class="prop">speler</span>, <span class="prop">toetsen</span>;
+
+<span class="kw">function</span> <span class="fn">maakSpel</span>() {
+  <span class="cm">// Maak speler-texture</span>
+  <span class="kw">const</span> <span class="prop">grafiek</span> = <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">graphics</span>();
+  grafiek.<span class="fn">fillStyle</span>(<span class="num">0x00d4ff</span>);
+  grafiek.<span class="fn">fillRect</span>(<span class="num">0</span>, <span class="num">0</span>, <span class="num">36</span>, <span class="num">36</span>);
+  grafiek.<span class="fn">generateTexture</span>(<span class="str">'speler'</span>, <span class="num">36</span>, <span class="num">36</span>);
+  grafiek.<span class="fn">destroy</span>();
+
+  speler = <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">image</span>(<span class="num">250</span>, <span class="num">150</span>, <span class="str">'speler'</span>);
+
+  <span class="cm">// Registreer de curstoetsen</span>
+  <span class="cm">// .left .right .up .down .space .shift</span>
+  toetsen = <span class="kw">this</span>.<span class="prop">input</span>.<span class="prop">keyboard</span>.<span class="fn">createCursorKeys</span>();
+}`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+let speler, toetsen;
+const config = {
+  type: Phaser.AUTO, width: 500, height: 300,
+  backgroundColor: '#0f3460',
+  scene: { create: maakSpel, update: updateSpel }
+};
+function maakSpel() {
+  const grafiek = this.add.graphics();
+  grafiek.fillStyle(0x00d4ff);
+  grafiek.fillRect(0, 0, 36, 36);
+  grafiek.generateTexture('speler', 36, 36);
+  grafiek.destroy();
+  speler = this.add.image(250, 150, 'speler');
+  toetsen = this.input.keyboard.createCursorKeys();
+  this.add.text(250, 275, 'Toetsen geregistreerd — klik op het spel en gebruik de pijltjes', {fontSize:'11px',fill:'#555577'}).setOrigin(0.5);
+}
+function updateSpel() {}
+new Phaser.Game(config);
+<\/script></body></html>`
+      },
+
+      {
+        naam: "isDown controleren",
+        desc: "toets.isDown in update()",
+        uitleg: "In <strong>update()</strong> controleer je elke frame of een toets ingedrukt is met <strong>.isDown</strong>. Als dat zo is, pas je de positie aan. Let op: je checkt alle toetsen apart, zodat diagonaal bewegen ook werkt.",
+        blokken: [
+          {
+            label: "maakSpel() (ongewijzigd)",
+            nieuw: false,
+            code:
+`<span class="kw">function</span> <span class="fn">maakSpel</span>() {
+  <span class="cm">// ... speler en toetsen aanmaken ...</span>
+  speler = <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">image</span>(<span class="num">250</span>, <span class="num">150</span>, <span class="str">'speler'</span>);
+  toetsen = <span class="kw">this</span>.<span class="prop">input</span>.<span class="prop">keyboard</span>.<span class="fn">createCursorKeys</span>();
+}`
+          },
+          {
+            label: "updateSpel() — beweging via toetsen",
+            nieuw: true,
+            code:
+`<span class="kw">function</span> <span class="fn">updateSpel</span>() {
+  <span class="kw">const</span> <span class="prop">snelheid</span> = <span class="num">4</span>; <span class="cm">// pixels per frame</span>
+
+  <span class="cm">// Elke toets apart controleren</span>
+  <span class="cm">// → zo werkt ook diagonaal bewegen</span>
+  <span class="kw">if</span> (toetsen.left.isDown)  speler.x -= <span class="prop">snelheid</span>;
+  <span class="kw">if</span> (toetsen.right.isDown) speler.x += <span class="prop">snelheid</span>;
+  <span class="kw">if</span> (toetsen.up.isDown)    speler.y -= <span class="prop">snelheid</span>;
+  <span class="kw">if</span> (toetsen.down.isDown)  speler.y += <span class="prop">snelheid</span>;
+}`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+let speler, toetsen;
+const config = {
+  type: Phaser.AUTO, width: 500, height: 300,
+  backgroundColor: '#0f3460',
+  scene: { create: maakSpel, update: updateSpel }
+};
+function maakSpel() {
+  const grafiek = this.add.graphics();
+  grafiek.fillStyle(0x00d4ff);
+  grafiek.fillRect(0, 0, 36, 36);
+  grafiek.generateTexture('speler', 36, 36);
+  grafiek.destroy();
+  speler = this.add.image(250, 150, 'speler');
+  toetsen = this.input.keyboard.createCursorKeys();
+  this.add.text(250, 275, 'Klik op het spel en gebruik de pijltjestoetsen', {fontSize:'11px',fill:'#555577'}).setOrigin(0.5);
+}
+function updateSpel() {
+  const snelheid = 4;
+  if (toetsen.left.isDown)  speler.x -= snelheid;
+  if (toetsen.right.isDown) speler.x += snelheid;
+  if (toetsen.up.isDown)    speler.y -= snelheid;
+  if (toetsen.down.isDown)  speler.y += snelheid;
+}
+new Phaser.Game(config);
+<\/script></body></html>`
+      },
+
+      {
+        naam: "Binnen het scherm blijven",
+        desc: "Phaser.Math.Clamp()",
+        uitleg: "De speler kan nu buiten het scherm lopen. <strong>Phaser.Math.Clamp(waarde, min, max)</strong> zorgt dat een getal altijd tussen twee grenzen blijft. Perfect om de speler binnen het spelvenster te houden.",
+        blokken: [
+          {
+            label: "updateSpel() — tot nu toe",
+            nieuw: false,
+            code:
+`<span class="kw">function</span> <span class="fn">updateSpel</span>() {
+  <span class="kw">const</span> <span class="prop">snelheid</span> = <span class="num">4</span>;
+  <span class="kw">if</span> (toetsen.left.isDown)  speler.x -= <span class="prop">snelheid</span>;
+  <span class="kw">if</span> (toetsen.right.isDown) speler.x += <span class="prop">snelheid</span>;
+  <span class="kw">if</span> (toetsen.up.isDown)    speler.y -= <span class="prop">snelheid</span>;
+  <span class="kw">if</span> (toetsen.down.isDown)  speler.y += <span class="prop">snelheid</span>;`
+          },
+          {
+            label: "Clamp toevoegen — nieuw",
+            nieuw: true,
+            code:
+`  <span class="cm">// Clamp(waarde, minimum, maximum)</span>
+  <span class="cm">// Als waarde < min → geeft min terug</span>
+  <span class="cm">// Als waarde > max → geeft max terug</span>
+  speler.x = Phaser.Math.<span class="fn">Clamp</span>(speler.x, <span class="num">18</span>, <span class="num">482</span>);
+  speler.y = Phaser.Math.<span class="fn">Clamp</span>(speler.y, <span class="num">18</span>, <span class="num">282</span>);
+}  <span class="cm">// einde updateSpel</span>`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+let speler, toetsen;
+const config = {
+  type: Phaser.AUTO, width: 500, height: 300,
+  backgroundColor: '#0f3460',
+  scene: { create: maakSpel, update: updateSpel }
+};
+function maakSpel() {
+  const grafiek = this.add.graphics();
+  grafiek.fillStyle(0x00d4ff);
+  grafiek.fillRect(0, 0, 36, 36);
+  grafiek.generateTexture('speler', 36, 36);
+  grafiek.destroy();
+  speler = this.add.image(250, 150, 'speler');
+  toetsen = this.input.keyboard.createCursorKeys();
+  this.add.text(250, 275, 'Klik op het spel — speler blijft nu binnen het scherm!', {fontSize:'11px',fill:'#555577'}).setOrigin(0.5);
+}
+function updateSpel() {
+  const snelheid = 4;
+  if (toetsen.left.isDown)  speler.x -= snelheid;
+  if (toetsen.right.isDown) speler.x += snelheid;
+  if (toetsen.up.isDown)    speler.y -= snelheid;
+  if (toetsen.down.isDown)  speler.y += snelheid;
+  speler.x = Phaser.Math.Clamp(speler.x, 18, 482);
+  speler.y = Phaser.Math.Clamp(speler.y, 18, 282);
+}
+new Phaser.Game(config);
+<\/script></body></html>`
+      },
+
+      {
+        naam: "Physics + toetsenbord",
+        desc: "setVelocity in update()",
+        uitleg: "Als je speler een <strong>physics-object</strong> is, gebruik je <strong>setVelocity</strong> in plaats van x en y aan te passen. Voordeel: physics zorgt voor zwaartekracht, zodat je een springen-effect kunt bouwen.",
+        blokken: [
+          {
+            label: "speler als physics-object — nieuw",
+            nieuw: true,
+            code:
+`<span class="kw">function</span> <span class="fn">maakSpel</span>() {
+  <span class="cm">// ... texture aanmaken ...</span>
+
+  <span class="cm">// physics.add.image ipv add.image</span>
+  speler = <span class="kw">this</span>.<span class="prop">physics</span>.<span class="prop">add</span>.<span class="fn">image</span>(<span class="num">250</span>, <span class="num">200</span>, <span class="str">'speler'</span>);
+  speler.<span class="fn">setCollideWorldBounds</span>(<span class="kw">true</span>); <span class="cm">// binnen scherm</span>
+
+  toetsen = <span class="kw">this</span>.<span class="prop">input</span>.<span class="prop">keyboard</span>.<span class="fn">createCursorKeys</span>();
+}`
+          },
+          {
+            label: "updateSpel() — velocity gebruiken",
+            nieuw: true,
+            code:
+`<span class="kw">function</span> <span class="fn">updateSpel</span>() {
+
+  <span class="cm">// Reset snelheid eerst (anders blijft speler bewegen)</span>
+  speler.<span class="fn">setVelocityX</span>(<span class="num">0</span>);
+
+  <span class="kw">if</span> (toetsen.left.isDown) {
+    speler.<span class="fn">setVelocityX</span>(<span class="num">-220</span>); <span class="cm">// 220px/s naar links</span>
+  } <span class="kw">else if</span> (toetsen.right.isDown) {
+    speler.<span class="fn">setVelocityX</span>(<span class="num">220</span>);  <span class="cm">// 220px/s naar rechts</span>
+  }
+
+  <span class="cm">// Springen: alleen als speler op de grond staat</span>
+  <span class="kw">if</span> (toetsen.up.isDown && speler.<span class="prop">body</span>.<span class="prop">touching</span>.<span class="prop">down</span>) {
+    speler.<span class="fn">setVelocityY</span>(<span class="num">-380</span>); <span class="cm">// omhoog schieten</span>
+  }
+}`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+let speler, toetsen, vloer;
+const config = {
+  type: Phaser.AUTO, width: 500, height: 300,
+  backgroundColor: '#0f3460',
+  physics: { default: 'arcade', arcade: { gravity: { y: 500 }, debug: false } },
+  scene: { create: maakSpel, update: updateSpel }
+};
+function maakSpel() {
+  const g1 = this.add.graphics();
+  g1.fillStyle(0x00d4ff); g1.fillRect(0,0,36,36);
+  g1.generateTexture('speler',36,36); g1.destroy();
+  const g2 = this.add.graphics();
+  g2.fillStyle(0x3ecf8e); g2.fillRect(0,0,500,16);
+  g2.generateTexture('vloer',500,16); g2.destroy();
+  vloer = this.physics.add.staticImage(250, 290, 'vloer');
+  speler = this.physics.add.image(250, 200, 'speler');
+  speler.setCollideWorldBounds(true);
+  this.physics.add.collider(speler, vloer);
+  toetsen = this.input.keyboard.createCursorKeys();
+  this.add.text(250, 10, 'Pijltjes = bewegen  |  Omhoog = springen', {fontSize:'11px',fill:'#555577'}).setOrigin(0.5);
+}
+function updateSpel() {
+  speler.setVelocityX(0);
+  if (toetsen.left.isDown) { speler.setVelocityX(-220); }
+  else if (toetsen.right.isDown) { speler.setVelocityX(220); }
+  if (toetsen.up.isDown && speler.body.touching.down) { speler.setVelocityY(-380); }
+}
+new Phaser.Game(config);
+<\/script></body></html>`
+      },
+
+      {
+        naam: "Eigen toetsen toevoegen",
+        desc: "addKeys() voor WASD",
+        uitleg: "Naast de curstoetsen kun je <strong>elke willekeurige toets</strong> registreren met <strong>addKeys()</strong>. Zo voeg je WASD toe als alternatieve besturing, of een toets voor schieten.",
+        blokken: [
+          {
+            label: "extra toetsen registreren — nieuw",
+            nieuw: true,
+            code:
+`<span class="kw">function</span> <span class="fn">maakSpel</span>() {
+  <span class="cm">// ... speler aanmaken ...</span>
+
+  <span class="cm">// Curstoetsen (pijltjes)</span>
+  toetsen = <span class="kw">this</span>.<span class="prop">input</span>.<span class="prop">keyboard</span>.<span class="fn">createCursorKeys</span>();
+
+  <span class="cm">// WASD als extra besturing</span>
+  <span class="kw">this</span>.<span class="prop">wasd</span> = <span class="kw">this</span>.<span class="prop">input</span>.<span class="prop">keyboard</span>.<span class="fn">addKeys</span>({
+    <span class="prop">links</span>:  Phaser.Input.Keyboard.KeyCodes.A,
+    <span class="prop">rechts</span>: Phaser.Input.Keyboard.KeyCodes.D,
+    <span class="prop">omhoog</span>: Phaser.Input.Keyboard.KeyCodes.W
+  });
+}`
+          },
+          {
+            label: "updateSpel() — WASD gebruiken",
+            nieuw: true,
+            code:
+`<span class="kw">function</span> <span class="fn">updateSpel</span>() {
+  speler.<span class="fn">setVelocityX</span>(<span class="num">0</span>);
+
+  <span class="cm">// Pijltjes OF WASD — beide werken</span>
+  <span class="kw">if</span> (toetsen.left.isDown  || <span class="kw">this</span>.<span class="prop">wasd</span>.<span class="prop">links</span>.isDown) {
+    speler.<span class="fn">setVelocityX</span>(<span class="num">-220</span>);
+  } <span class="kw">else if</span> (toetsen.right.isDown || <span class="kw">this</span>.<span class="prop">wasd</span>.<span class="prop">rechts</span>.isDown) {
+    speler.<span class="fn">setVelocityX</span>(<span class="num">220</span>);
+  }
+
+  <span class="kw">const</span> <span class="prop">opGrond</span> = speler.<span class="prop">body</span>.<span class="prop">touching</span>.<span class="prop">down</span>;
+  <span class="kw">if</span> ((toetsen.up.isDown || <span class="kw">this</span>.<span class="prop">wasd</span>.<span class="prop">omhoog</span>.isDown) && <span class="prop">opGrond</span>) {
+    speler.<span class="fn">setVelocityY</span>(<span class="num">-380</span>);
+  }
+}`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+let speler, toetsen, vloer;
+const config = {
+  type: Phaser.AUTO, width: 500, height: 300,
+  backgroundColor: '#0f3460',
+  physics: { default: 'arcade', arcade: { gravity: { y: 500 }, debug: false } },
+  scene: { create: maakSpel, update: updateSpel }
+};
+function maakSpel() {
+  const g1 = this.add.graphics();
+  g1.fillStyle(0x00d4ff); g1.fillRect(0,0,36,36);
+  g1.generateTexture('speler',36,36); g1.destroy();
+  const g2 = this.add.graphics();
+  g2.fillStyle(0x3ecf8e); g2.fillRect(0,0,500,16);
+  g2.generateTexture('vloer',500,16); g2.destroy();
+  vloer = this.physics.add.staticImage(250, 290, 'vloer');
+  speler = this.physics.add.image(250, 200, 'speler');
+  speler.setCollideWorldBounds(true);
+  this.physics.add.collider(speler, vloer);
+  toetsen = this.input.keyboard.createCursorKeys();
+  this.wasd = this.input.keyboard.addKeys({
+    links: Phaser.Input.Keyboard.KeyCodes.A,
+    rechts: Phaser.Input.Keyboard.KeyCodes.D,
+    omhoog: Phaser.Input.Keyboard.KeyCodes.W
+  });
+  this.add.text(250, 10, 'Pijltjes of WASD = bewegen  |  Omhoog/W = springen', {fontSize:'11px',fill:'#555577'}).setOrigin(0.5);
+}
+function updateSpel() {
+  speler.setVelocityX(0);
+  if (toetsen.left.isDown || this.wasd.links.isDown) { speler.setVelocityX(-220); }
+  else if (toetsen.right.isDown || this.wasd.rechts.isDown) { speler.setVelocityX(220); }
+  if ((toetsen.up.isDown || this.wasd.omhoog.isDown) && speler.body.touching.down) { speler.setVelocityY(-380); }
+}
+new Phaser.Game(config);
+<\/script></body></html>`
+      }
+    ]
+  }
+
+];
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+
+let huidigeLes = 0;
+let huidigeStap = 0;
+
+// ═══════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════
+
+function renderStappen() {
+  const les = lessen[huidigeLes];
+  const lijst = document.getElementById('stappen-lijst');
+  lijst.innerHTML = '';
+
+  les.stappen.forEach((stap, i) => {
+    const el = document.createElement('div');
+    el.className = 'stap-item' +
+      (i === huidigeStap ? ' active' : '') +
+      (i < huidigeStap ? ' done' : '');
+    el.onclick = () => { huidigeStap = i; renderAlles(); };
+    el.innerHTML = `
+      <div class="stap-bullet">${i < huidigeStap ? '' : (i + 1)}</div>
+      <div class="stap-info">
+        <div class="stap-naam">${stap.naam}</div>
+        <div class="stap-desc">${stap.desc}</div>
+      </div>`;
+    lijst.appendChild(el);
+  });
+
+  const totaal = les.stappen.length;
+  document.getElementById('btn-vorige').disabled = (huidigeStap === 0);
+  document.getElementById('btn-volgende').disabled = (huidigeStap === totaal - 1);
+  document.getElementById('btn-volgende').textContent =
+    huidigeStap === totaal - 1 ? '✓ Klaar' : 'Volgende →';
+}
+
+function renderCode() {
+  const stap = lessen[huidigeLes].stappen[huidigeStap];
+  const container = document.getElementById('code-weergave');
+  container.innerHTML = '';
+
+  // Uitlegblok
+  const uitlegEl = document.createElement('div');
+  uitlegEl.className = 'uitleg-blok';
+  uitlegEl.innerHTML = stap.uitleg;
+  container.appendChild(uitlegEl);
+
+  // Code blokken
+  stap.blokken.forEach(blok => {
+    const wrap = document.createElement('div');
+    wrap.className = 'code-blok' + (blok.nieuw ? ' nieuw' : '');
+
+    const label = document.createElement('div');
+    label.className = 'code-blok-label';
+    label.innerHTML = blok.label + (blok.nieuw ? ' <span class="nieuw-badge">nieuw</span>' : '');
+
+    const pre = document.createElement('pre');
+    pre.innerHTML = blok.code;
+
+    wrap.appendChild(label);
+    wrap.appendChild(pre);
+    container.appendChild(wrap);
+  });
+}
+
+function renderAlles() {
+  renderStappen();
+  renderCode();
+  // Reset preview
+  document.getElementById('preview').style.display = 'none';
+  document.getElementById('placeholder').style.display = 'flex';
+}
+
+// ═══════════════════════════════════════════════════════════
+// ACTIES
+// ═══════════════════════════════════════════════════════════
+
+function laadLes(index) {
+  huidigeLes = index;
+  huidigeStap = 0;
+  document.querySelectorAll('.les-tab').forEach((t, i) => t.classList.toggle('active', i === index));
+  renderAlles();
+}
+
+function volgendeStap() {
+  const max = lessen[huidigeLes].stappen.length - 1;
+  if (huidigeStap < max) { huidigeStap++; renderAlles(); }
+}
+
+function vorigeStap() {
+  if (huidigeStap > 0) { huidigeStap--; renderAlles(); }
+}
+
+function voerUit() {
+  const stap = lessen[huidigeLes].stappen[huidigeStap];
+  const frame = document.getElementById('preview');
+  const placeholder = document.getElementById('placeholder');
+  const doc = frame.contentDocument || frame.contentWindow.document;
+  doc.open();
+  doc.write(stap.volledigeCode);
+  doc.close();
+  placeholder.style.display = 'none';
+  frame.style.display = 'block';
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+
+renderAlles();
+</script>
+
+</body>
+</html>
