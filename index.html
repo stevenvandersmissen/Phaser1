@@ -343,6 +343,11 @@ body {
       <button class="les-tab" onclick="laadLes(3)">Les 4 — Beweging</button>
       <button class="les-tab" onclick="laadLes(4)">Les 5 — Physics</button>
       <button class="les-tab" onclick="laadLes(5)">Les 6 — Toetsenbord</button>
+      <button class="les-tab" onclick="laadLes(6)">Les 7 — Sprites</button>
+      <button class="les-tab" onclick="laadLes(7)">Les 8 — Animaties</button>
+      <button class="les-tab" onclick="laadLes(8)">Les 9 — Groepen & overlap</button>
+      <button class="les-tab" onclick="laadLes(9)">Les 10 — Score & UI</button>
+      <button class="les-tab" onclick="laadLes(10)">Les 11 — Scenes</button>
     </div>
   </div>
 </div>
@@ -2131,6 +2136,858 @@ function updateSpel() {
   else if (toetsen.right.isDown || this.wasd.rechts.isDown) { speler.setVelocityX(220); }
   if ((toetsen.up.isDown || this.wasd.omhoog.isDown) && speler.body.touching.down) { speler.setVelocityY(-380); }
 }
+new Phaser.Game(config);
+<\/script></body></html>`
+      }
+    ]
+  },
+
+  // ─── LES 7: SPRITES ──────────────────────────────────────
+  {
+    naam: "Sprites & afbeeldingen",
+    stappen: [
+      {
+        naam: "Wat is een sprite?",
+        desc: "afbeelding als spelobject",
+        uitleg: "Een <strong>sprite</strong> is een afbeelding in je spel met een positie, schaal en rotatie. Tot nu tekenden we vormen met Graphics; nu gebruiken we echte afbeeldingen.",
+        blokken: [
+          {
+            label: "graphics vs sprite",
+            nieuw: true,
+            code:
+`<span class="cm">// Graphics: code tekent de vorm</span>
+<span class="kw">const</span> <span class="prop">g</span> = <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">graphics</span>();
+g.<span class="fn">fillStyle</span>(<span class="num">0xff0000</span>);
+g.<span class="fn">fillRect</span>(<span class="num">0</span>, <span class="num">0</span>, <span class="num">50</span>, <span class="num">50</span>);
+
+<span class="cm">// Sprite: een afbeeldingsbestand tonen</span>
+<span class="cm">// → echte pixel-art, animaties mogelijk</span>
+<span class="kw">const</span> <span class="prop">speler</span> = <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">image</span>(<span class="num">250</span>, <span class="num">150</span>, <span class="str">'speler'</span>);`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body style="background:#0e0e14;margin:0;font-family:monospace;display:flex;align-items:center;justify-content:center;height:100vh;"><div style="color:#e8e8f0;max-width:420px;text-align:center;"><p style="color:#9090a8;font-size:13px;margin-bottom:1.5rem;">Van code-tekening naar echte afbeelding:</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;"><div style="background:#16161f;border:1px solid #3a3a50;border-radius:8px;padding:16px;"><canvas id="c" width="60" height="60" style="display:block;margin:0 auto 10px;"></canvas><div style="color:#9090a8;font-size:12px;text-align:center;">Graphics<br><span style="color:#55556a;">getekend met code</span></div></div><div style="background:#16161f;border:1px solid #7c6fff;border-radius:8px;padding:16px;text-align:center;"><div style="width:60px;height:60px;margin:0 auto 10px;background:linear-gradient(135deg,#e94560,#f5a623);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:28px;">🧙</div><div style="color:#a89fff;font-size:12px;">Sprite<br><span style="color:#55556a;">geladen als afbeelding</span></div></div></div></div><script>const c=document.getElementById('c').getContext('2d');c.fillStyle='#e94560';c.fillRect(10,10,40,40);<\/script></body></html>`
+      },
+      {
+        naam: "Laden in preload()",
+        desc: "this.load.image(sleutel, pad)",
+        uitleg: "<strong>preload()</strong> is de plek om afbeeldingen te laden. Geef elk bestand een <strong>sleutel</strong> — die naam gebruik je later in create(). Phaser wacht tot alles geladen is voor create() start.",
+        blokken: [
+          {
+            label: "preload() — afbeeldingen laden",
+            nieuw: true,
+            code:
+`<span class="kw">function</span> <span class="fn">laadAssets</span>() {
+  <span class="cm">// load.image('sleutel', 'pad of URL')</span>
+  <span class="kw">this</span>.<span class="prop">load</span>.<span class="fn">image</span>(<span class="str">'speler'</span>, <span class="str">'assets/speler.png'</span>);
+  <span class="kw">this</span>.<span class="prop">load</span>.<span class="fn">image</span>(<span class="str">'ster'</span>,   <span class="str">'assets/ster.png'</span>);
+  <span class="kw">this</span>.<span class="prop">load</span>.<span class="fn">image</span>(<span class="str">'grond'</span>,  <span class="str">'assets/grond.png'</span>);
+}
+
+<span class="kw">const</span> <span class="prop">config</span> = {
+  <span class="prop">scene</span>: {
+    <span class="fn">preload</span>: <span class="fn">laadAssets</span>, <span class="cm">// 1. laden</span>
+    <span class="fn">create</span>: <span class="fn">maakSpel</span>,   <span class="cm">// 2. bouwen</span>
+    <span class="fn">update</span>: <span class="fn">updateSpel</span>  <span class="cm">// 3. loopen</span>
+  }
+};`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body style="background:#0e0e14;margin:0;font-family:monospace;display:flex;align-items:center;justify-content:center;height:100vh;"><div style="color:#e8e8f0;max-width:400px;"><p style="color:#9090a8;font-size:13px;margin-bottom:1rem;text-align:center;">Volgorde van uitvoering:</p><div style="display:flex;flex-direction:column;gap:8px;"><div style="background:#16161f;border:1px solid #f5a623;border-radius:8px;padding:12px 14px;display:flex;gap:12px;align-items:center;"><span style="color:#f5a623;font-size:20px;width:28px;text-align:center;">1</span><div><div style="color:#f5a623;font-size:13px;font-weight:700;">preload()</div><div style="color:#9090a8;font-size:12px;">Laadt alle assets. Wacht tot alles klaar is.</div></div></div><div style="background:#16161f;border:1px solid #3ecf8e;border-radius:8px;padding:12px 14px;display:flex;gap:12px;align-items:center;"><span style="color:#3ecf8e;font-size:20px;width:28px;text-align:center;">2</span><div><div style="color:#3ecf8e;font-size:13px;font-weight:700;">create()</div><div style="color:#9090a8;font-size:12px;">Bouwt het speelveld. 1× uitgevoerd.</div></div></div><div style="background:#16161f;border:1px solid #a89fff;border-radius:8px;padding:12px 14px;display:flex;gap:12px;align-items:center;"><span style="color:#a89fff;font-size:20px;width:28px;text-align:center;">∞</span><div><div style="color:#a89fff;font-size:13px;font-weight:700;">update()</div><div style="color:#9090a8;font-size:12px;">Game loop. ~60× per seconde.</div></div></div></div></div></body></html>`
+      },
+      {
+        naam: "Plaatsen in create()",
+        desc: "this.add.image() + setScale / setFlipX",
+        uitleg: "Met de <strong>sleutel</strong> uit preload() plaats je een afbeelding via <strong>this.add.image(x, y, 'sleutel')</strong>. Het ankerpunt staat standaard in het midden. Je kunt schaal, spiegeling en transparantie instellen.",
+        blokken: [
+          {
+            label: "create() — afbeelding plaatsen en aanpassen",
+            nieuw: true,
+            code:
+`<span class="kw">function</span> <span class="fn">maakSpel</span>() {
+  <span class="kw">const</span> <span class="prop">speler</span> = <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">image</span>(<span class="num">250</span>, <span class="num">150</span>, <span class="str">'speler'</span>);
+
+  speler.<span class="fn">setScale</span>(<span class="num">2</span>);       <span class="cm">// 2× groter</span>
+  speler.<span class="fn">setFlipX</span>(<span class="kw">true</span>);    <span class="cm">// spiegel horizontaal</span>
+  speler.<span class="fn">setAlpha</span>(<span class="num">0.8</span>);    <span class="cm">// 80% zichtbaar</span>
+  speler.<span class="fn">setDepth</span>(<span class="num">10</span>);     <span class="cm">// voor achtergrond</span>
+}`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+const config={type:Phaser.AUTO,width:500,height:260,backgroundColor:'#1a1a2e',scene:{preload:laadAssets,create:maakSpel}};
+function laadAssets(){this.load.image('speler','https://labs.phaser.io/assets/sprites/phaser-dude.png');}
+function maakSpel(){
+  this.add.text(250,18,'setScale / setFlipX / setAlpha',{fontSize:'13px',fill:'#55556a'}).setOrigin(0.5);
+  this.add.image(100,140,'speler').setScale(1.5);
+  this.add.text(100,225,'normaal',{fontSize:'12px',fill:'#55556a'}).setOrigin(0.5);
+  this.add.image(250,140,'speler').setScale(2.5);
+  this.add.text(250,225,'setScale(2.5)',{fontSize:'12px',fill:'#55556a'}).setOrigin(0.5);
+  this.add.image(400,140,'speler').setScale(1.5).setFlipX(true).setAlpha(0.45);
+  this.add.text(400,225,'flip + alpha',{fontSize:'12px',fill:'#55556a'}).setOrigin(0.5);
+}
+new Phaser.Game(config);
+<\/script></body></html>`
+      },
+      {
+        naam: "image vs sprite vs physics.sprite",
+        desc: "wanneer gebruik je wat?",
+        uitleg: "Er zijn drie manieren om een afbeelding te tonen. <strong>add.image</strong> voor statische decoratie, <strong>add.sprite</strong> voor objecten met animaties, <strong>physics.add.sprite</strong> voor animaties én physics samen.",
+        blokken: [
+          {
+            label: "drie opties vergeleken",
+            nieuw: true,
+            code:
+`<span class="cm">// 1. add.image — statisch, geen animatie, geen physics</span>
+<span class="cm">//    → achtergrond, decoratie, UI-elementen</span>
+<span class="kw">const</span> <span class="prop">bg</span> = <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">image</span>(<span class="num">250</span>, <span class="num">150</span>, <span class="str">'lucht'</span>);
+
+<span class="cm">// 2. add.sprite — heeft animaties, geen physics</span>
+<span class="cm">//    → decoratieve animaties, vuur, effecten</span>
+<span class="kw">const</span> <span class="prop">vuur</span> = <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">sprite</span>(<span class="num">100</span>, <span class="num">200</span>, <span class="str">'vuur'</span>);
+vuur.<span class="prop">anims</span>.<span class="fn">play</span>(<span class="str">'branden'</span>);
+
+<span class="cm">// 3. physics.add.sprite — animaties + physics</span>
+<span class="cm">//    → speler, vijanden die lopen en vallen</span>
+<span class="kw">const</span> <span class="prop">speler</span> = <span class="kw">this</span>.<span class="prop">physics</span>.<span class="prop">add</span>.<span class="fn">sprite</span>(<span class="num">100</span>, <span class="num">200</span>, <span class="str">'held'</span>);
+speler.<span class="fn">setCollideWorldBounds</span>(<span class="kw">true</span>);`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+const config={type:Phaser.AUTO,width:500,height:260,backgroundColor:'#0f3460',physics:{default:'arcade',arcade:{gravity:{y:280},debug:false}},scene:{preload:laadAssets,create:maakSpel}};
+function laadAssets(){
+  this.load.image('speler','https://labs.phaser.io/assets/sprites/phaser-dude.png');
+  this.load.image('ster','https://labs.phaser.io/assets/demoscene/star.png');
+}
+function maakSpel(){
+  this.add.text(100,22,'add.image',{fontSize:'13px',fill:'#f5a623'}).setOrigin(0.5);
+  this.add.text(100,38,'statisch',{fontSize:'11px',fill:'#55556a'}).setOrigin(0.5);
+  this.add.image(100,140,'ster').setScale(2.5);
+  this.add.text(270,22,'add.sprite',{fontSize:'13px',fill:'#3ecf8e'}).setOrigin(0.5);
+  this.add.text(270,38,'animatie mogelijk',{fontSize:'11px',fill:'#55556a'}).setOrigin(0.5);
+  this.add.sprite(270,130,'speler').setScale(1.4);
+  this.add.text(420,22,'physics.sprite',{fontSize:'13px',fill:'#a89fff'}).setOrigin(0.5);
+  this.add.text(420,38,'physics+animatie',{fontSize:'11px',fill:'#55556a'}).setOrigin(0.5);
+  const s=this.physics.add.sprite(420,70,'speler').setScale(1.2);
+  s.setCollideWorldBounds(true);s.setBounce(0.7);s.setVelocityX(70);
+}
+new Phaser.Game(config);
+<\/script></body></html>`
+      }
+    ]
+  },
+
+  // ─── LES 8: ANIMATIES ────────────────────────────────────
+  {
+    naam: "Animaties",
+    stappen: [
+      {
+        naam: "Spritesheet laden",
+        desc: "load.spritesheet() met frameWidth/Height",
+        uitleg: "Een <strong>spritesheet</strong> is één afbeelding met alle animatieframes naast elkaar. Je laadt hem met <strong>load.spritesheet()</strong> en geeft de breedte en hoogte van één frame op. Phaser nummert de frames automatisch.",
+        blokken: [
+          {
+            label: "spritesheet laden in preload()",
+            nieuw: true,
+            code:
+`<span class="kw">function</span> <span class="fn">laadAssets</span>() {
+
+  <span class="cm">// load.spritesheet ipv load.image</span>
+  <span class="kw">this</span>.<span class="prop">load</span>.<span class="fn">spritesheet</span>(<span class="str">'held'</span>, <span class="str">'assets/held.png'</span>, {
+    <span class="prop">frameWidth</span>:  <span class="num">32</span>,  <span class="cm">// breedte van 1 frame</span>
+    <span class="prop">frameHeight</span>: <span class="num">48</span>   <span class="cm">// hoogte van 1 frame</span>
+  });
+
+  <span class="cm">// Frames worden genummerd: 0, 1, 2, 3...</span>
+  <span class="cm">// Van links naar rechts, rij per rij</span>
+}`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+const config={type:Phaser.AUTO,width:500,height:250,backgroundColor:'#16213e',scene:{preload:laadAssets,create:maakSpel}};
+function laadAssets(){this.load.spritesheet('held','https://labs.phaser.io/assets/sprites/dude.png',{frameWidth:32,frameHeight:48});}
+function maakSpel(){
+  this.add.text(250,16,'Alle frames van de spritesheet',{fontSize:'13px',fill:'#9090a8'}).setOrigin(0.5);
+  for(let i=0;i<9;i++){
+    this.add.image(32+i*50,105,'held',i).setScale(2.2);
+    this.add.text(32+i*50,152,'#'+i,{fontSize:'11px',fill:'#55556a'}).setOrigin(0.5);
+  }
+  this.add.text(250,190,'frameWidth:32  frameHeight:48',{fontSize:'12px',fill:'#7c6fff',fontFamily:'monospace'}).setOrigin(0.5);
+}
+new Phaser.Game(config);
+<\/script></body></html>`
+      },
+      {
+        naam: "Animatie definiëren",
+        desc: "this.anims.create()",
+        uitleg: "Met <strong>this.anims.create()</strong> definieer je een animatie: welke frames, hoe snel (<strong>frameRate</strong>) en of het herhaalt (<strong>repeat: -1</strong> = oneindig). Doe dit in create() vóór je de animatie afspeelt.",
+        blokken: [
+          {
+            label: "animaties definiëren in create()",
+            nieuw: true,
+            code:
+`<span class="kw">function</span> <span class="fn">maakSpel</span>() {
+
+  <span class="kw">this</span>.<span class="prop">anims</span>.<span class="fn">create</span>({
+    <span class="prop">key</span>: <span class="str">'lopen-links'</span>,
+    <span class="prop">frames</span>: <span class="kw">this</span>.<span class="prop">anims</span>.<span class="fn">generateFrameNumbers</span>(
+      <span class="str">'held'</span>, { <span class="prop">start</span>: <span class="num">0</span>, <span class="prop">end</span>: <span class="num">3</span> }
+    ),
+    <span class="prop">frameRate</span>: <span class="num">10</span>,   <span class="cm">// frames per seconde</span>
+    <span class="prop">repeat</span>: <span class="num">-1</span>       <span class="cm">// -1 = herhaal oneindig</span>
+  });
+
+  <span class="kw">this</span>.<span class="prop">anims</span>.<span class="fn">create</span>({
+    <span class="prop">key</span>: <span class="str">'stilstaan'</span>,
+    <span class="prop">frames</span>: [{ <span class="prop">key</span>: <span class="str">'held'</span>, <span class="prop">frame</span>: <span class="num">4</span> }],
+    <span class="prop">frameRate</span>: <span class="num">20</span>
+  });
+}`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+const config={type:Phaser.AUTO,width:500,height:250,backgroundColor:'#16213e',scene:{preload:laadAssets,create:maakSpel}};
+function laadAssets(){this.load.spritesheet('held','https://labs.phaser.io/assets/sprites/dude.png',{frameWidth:32,frameHeight:48});}
+function maakSpel(){
+  this.anims.create({key:'links', frames:this.anims.generateFrameNumbers('held',{start:0,end:3}),frameRate:10,repeat:-1});
+  this.anims.create({key:'stil',  frames:[{key:'held',frame:4}],frameRate:20});
+  this.anims.create({key:'rechts',frames:this.anims.generateFrameNumbers('held',{start:5,end:8}),frameRate:10,repeat:-1});
+  const s1=this.add.sprite(100,125,'held').setScale(3); s1.anims.play('links');
+  const s2=this.add.sprite(250,125,'held').setScale(3); s2.anims.play('stil');
+  const s3=this.add.sprite(400,125,'held').setScale(3); s3.anims.play('rechts');
+  this.add.text(100,215,"lopen-links",{fontSize:'12px',fill:'#9090a8'}).setOrigin(0.5);
+  this.add.text(250,215,"stilstaan",  {fontSize:'12px',fill:'#9090a8'}).setOrigin(0.5);
+  this.add.text(400,215,"lopen-rechts",{fontSize:'12px',fill:'#9090a8'}).setOrigin(0.5);
+}
+new Phaser.Game(config);
+<\/script></body></html>`
+      },
+      {
+        naam: "Animatie afspelen in update()",
+        desc: "anims.play('sleutel', true)",
+        uitleg: "Speel een animatie af met <strong>sprite.anims.play('sleutel', true)</strong>. Het tweede argument <strong>true</strong> is cruciaal: het voorkomt dat de animatie elke frame opnieuw reset. Zonder dit flikkert de animatie.",
+        blokken: [
+          {
+            label: "update() — juiste animatie per beweging",
+            nieuw: true,
+            code:
+`<span class="kw">function</span> <span class="fn">updateSpel</span>() {
+  speler.<span class="fn">setVelocityX</span>(<span class="num">0</span>);
+
+  <span class="kw">if</span> (toetsen.left.isDown) {
+    speler.<span class="fn">setVelocityX</span>(<span class="num">-200</span>);
+    speler.<span class="prop">anims</span>.<span class="fn">play</span>(<span class="str">'links'</span>, <span class="kw">true</span>);  <span class="cm">// true = niet resetten</span>
+
+  } <span class="kw">else if</span> (toetsen.right.isDown) {
+    speler.<span class="fn">setVelocityX</span>(<span class="num">200</span>);
+    speler.<span class="prop">anims</span>.<span class="fn">play</span>(<span class="str">'rechts'</span>, <span class="kw">true</span>);
+
+  } <span class="kw">else</span> {
+    speler.<span class="prop">anims</span>.<span class="fn">play</span>(<span class="str">'stil'</span>, <span class="kw">true</span>);
+  }
+
+  <span class="kw">if</span> (toetsen.up.isDown && speler.<span class="prop">body</span>.<span class="prop">touching</span>.<span class="prop">down</span>) {
+    speler.<span class="fn">setVelocityY</span>(<span class="num">-450</span>);
+  }
+}`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+let speler,toetsen;
+const config={type:Phaser.AUTO,width:500,height:270,backgroundColor:'#16213e',physics:{default:'arcade',arcade:{gravity:{y:600},debug:false}},scene:{preload:laadAssets,create:maakSpel,update:updateSpel}};
+function laadAssets(){
+  this.load.spritesheet('held','https://labs.phaser.io/assets/sprites/dude.png',{frameWidth:32,frameHeight:48});
+  this.load.image('grond','https://labs.phaser.io/assets/sprites/platform.png');
+}
+function maakSpel(){
+  this.anims.create({key:'links', frames:this.anims.generateFrameNumbers('held',{start:0,end:3}),frameRate:10,repeat:-1});
+  this.anims.create({key:'rechts',frames:this.anims.generateFrameNumbers('held',{start:5,end:8}),frameRate:10,repeat:-1});
+  this.anims.create({key:'stil',  frames:[{key:'held',frame:4}],frameRate:20});
+  const vloer=this.physics.add.staticImage(250,258,'grond').setScale(2,0.5).refreshBody();
+  speler=this.physics.add.sprite(100,185,'held').setScale(2);
+  speler.setCollideWorldBounds(true);
+  this.physics.add.collider(speler,vloer);
+  toetsen=this.input.keyboard.createCursorKeys();
+  this.add.text(250,10,'← → bewegen  |  ↑ springen  — kijk naar de animaties!',{fontSize:'11px',fill:'#55556a'}).setOrigin(0.5);
+}
+function updateSpel(){
+  speler.setVelocityX(0);
+  if(toetsen.left.isDown){speler.setVelocityX(-200);speler.anims.play('links',true);}
+  else if(toetsen.right.isDown){speler.setVelocityX(200);speler.anims.play('rechts',true);}
+  else{speler.anims.play('stil',true);}
+  if(toetsen.up.isDown&&speler.body.touching.down){speler.setVelocityY(-450);}
+}
+new Phaser.Game(config);
+<\/script></body></html>`
+      }
+    ]
+  },
+
+  // ─── LES 9: GROEPEN & OVERLAP ────────────────────────────
+  {
+    naam: "Groepen & overlap",
+    stappen: [
+      {
+        naam: "Groep aanmaken met repeat",
+        desc: "physics.add.group()",
+        uitleg: "Een <strong>groep</strong> beheert meerdere gelijkaardige objecten tegelijk. Met <strong>repeat</strong> maak je snel meerdere exemplaren aan. Met <strong>getChildren().forEach()</strong> pas je ze allemaal tegelijk aan.",
+        blokken: [
+          {
+            label: "groep aanmaken in create()",
+            nieuw: true,
+            code:
+`<span class="kw">function</span> <span class="fn">maakSpel</span>() {
+
+  <span class="cm">// repeat:7 → 1 + 7 = 8 sterren totaal</span>
+  <span class="kw">const</span> <span class="prop">sterren</span> = <span class="kw">this</span>.<span class="prop">physics</span>.<span class="prop">add</span>.<span class="fn">group</span>({
+    <span class="prop">key</span>: <span class="str">'ster'</span>,
+    <span class="prop">repeat</span>: <span class="num">7</span>,
+    <span class="prop">setXY</span>: { <span class="prop">x</span>: <span class="num">30</span>, <span class="prop">y</span>: <span class="num">60</span>, <span class="prop">stepX</span>: <span class="num">60</span> }
+  });
+
+  <span class="cm">// Geef elke ster willekeurige stuiterkracht</span>
+  sterren.<span class="fn">getChildren</span>().<span class="fn">forEach</span>(ster => {
+    ster.<span class="fn">setBounce</span>(Phaser.Math.<span class="fn">FloatBetween</span>(<span class="num">0.3</span>, <span class="num">0.9</span>));
+    ster.<span class="fn">setCollideWorldBounds</span>(<span class="kw">true</span>);
+  });
+}`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+const config={type:Phaser.AUTO,width:500,height:210,backgroundColor:'#16213e',physics:{default:'arcade',arcade:{gravity:{y:250},debug:false}},scene:{preload:laadAssets,create:maakSpel}};
+function laadAssets(){this.load.image('ster','https://labs.phaser.io/assets/demoscene/star.png');}
+function maakSpel(){
+  const sterren=this.physics.add.group({key:'ster',repeat:7,setXY:{x:30,y:30,stepX:58}});
+  sterren.getChildren().forEach(s=>{s.setBounce(Phaser.Math.FloatBetween(0.3,0.9));s.setCollideWorldBounds(true);});
+  this.add.text(250,188,'8 sterren met repeat:7 — elk met andere stuiterkracht',{fontSize:'11px',fill:'#55556a'}).setOrigin(0.5);
+}
+new Phaser.Game(config);
+<\/script></body></html>`
+      },
+      {
+        naam: "overlap() instellen",
+        desc: "aanraking zonder fysiek botsen",
+        uitleg: "<strong>physics.add.overlap()</strong> detecteert aanraking maar blokkeert de beweging niet. Perfect voor collectibles. De <strong>callback</strong> wordt automatisch aangeroepen bij aanraking — je verwijdert het object met <strong>disableBody(true, true)</strong>.",
+        blokken: [
+          {
+            label: "overlap + callback",
+            nieuw: true,
+            code:
+`<span class="kw">function</span> <span class="fn">maakSpel</span>() {
+  <span class="cm">// ... speler en sterren aanmaken ...</span>
+
+  <span class="cm">// overlap(A, B, callback, null, this)</span>
+  <span class="kw">this</span>.<span class="prop">physics</span>.<span class="prop">add</span>.<span class="fn">overlap</span>(
+    speler,
+    sterren,
+    <span class="fn">raapSterOp</span>,
+    <span class="kw">null</span>,
+    <span class="kw">this</span>
+  );
+}
+
+<span class="kw">function</span> <span class="fn">raapSterOp</span>(speler, ster) {
+  <span class="cm">// disableBody(physics uit, onzichtbaar)</span>
+  ster.<span class="fn">disableBody</span>(<span class="kw">true</span>, <span class="kw">true</span>);
+}`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+let speler,sterren,toetsen;
+const config={type:Phaser.AUTO,width:500,height:260,backgroundColor:'#0f3460',physics:{default:'arcade',arcade:{gravity:{y:400},debug:false}},scene:{preload:laadAssets,create:maakSpel,update:updateSpel}};
+function laadAssets(){
+  this.load.image('ster','https://labs.phaser.io/assets/demoscene/star.png');
+  this.load.spritesheet('held','https://labs.phaser.io/assets/sprites/dude.png',{frameWidth:32,frameHeight:48});
+  this.load.image('grond','https://labs.phaser.io/assets/sprites/platform.png');
+}
+function maakSpel(){
+  this.anims.create({key:'links',frames:this.anims.generateFrameNumbers('held',{start:0,end:3}),frameRate:10,repeat:-1});
+  this.anims.create({key:'rechts',frames:this.anims.generateFrameNumbers('held',{start:5,end:8}),frameRate:10,repeat:-1});
+  this.anims.create({key:'stil',frames:[{key:'held',frame:4}],frameRate:20});
+  const vloer=this.physics.add.staticImage(250,250,'grond').setScale(2,0.5).refreshBody();
+  speler=this.physics.add.sprite(100,165,'held').setScale(2);
+  speler.setCollideWorldBounds(true);
+  this.physics.add.collider(speler,vloer);
+  sterren=this.physics.add.group({key:'ster',repeat:6,setXY:{x:30,y:20,stepX:68}});
+  sterren.getChildren().forEach(s=>{s.setBounce(0.5);s.setCollideWorldBounds(true);});
+  this.physics.add.overlap(speler,sterren,raapSterOp,null,this);
+  toetsen=this.input.keyboard.createCursorKeys();
+  this.add.text(250,248,'Loop over de sterren!',{fontSize:'11px',fill:'#55556a'}).setOrigin(0.5);
+}
+function raapSterOp(sp,ster){ster.disableBody(true,true);}
+function updateSpel(){
+  speler.setVelocityX(0);
+  if(toetsen.left.isDown){speler.setVelocityX(-200);speler.anims.play('links',true);}
+  else if(toetsen.right.isDown){speler.setVelocityX(200);speler.anims.play('rechts',true);}
+  else{speler.anims.play('stil',true);}
+  if(toetsen.up.isDown&&speler.body.touching.down){speler.setVelocityY(-420);}
+}
+new Phaser.Game(config);
+<\/script></body></html>`
+      },
+      {
+        naam: "Tellen hoeveel er over zijn",
+        desc: "getChildren().filter(s => s.active)",
+        uitleg: "Met <strong>getChildren()</strong> krijg je een array van alle objecten. Met <strong>.filter(s => s.active)</strong> filter je actieve (niet-geraapt) objecten eruit. Als er geen meer zijn, is het spel gewonnen.",
+        blokken: [
+          {
+            label: "actieve objecten tellen in update()",
+            nieuw: true,
+            code:
+`<span class="kw">function</span> <span class="fn">updateSpel</span>() {
+  <span class="cm">// ... beweging ...</span>
+
+  <span class="kw">const</span> <span class="prop">actief</span> = sterren
+    .<span class="fn">getChildren</span>()
+    .<span class="fn">filter</span>(ster => ster.<span class="prop">active</span>)
+    .<span class="prop">length</span>;
+
+  <span class="kw">if</span> (<span class="prop">actief</span> === <span class="num">0</span>) {
+    tekst.<span class="fn">setText</span>(<span class="str">'🎉 Gewonnen!'</span>);
+  } <span class="kw">else</span> {
+    tekst.<span class="fn">setText</span>(<span class="str">'Nog '</span> + <span class="prop">actief</span> + <span class="str">' ster(ren)'</span>);
+  }
+}`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+let speler,sterren,toetsen,tekst;
+const config={type:Phaser.AUTO,width:500,height:260,backgroundColor:'#0f3460',physics:{default:'arcade',arcade:{gravity:{y:400},debug:false}},scene:{preload:laadAssets,create:maakSpel,update:updateSpel}};
+function laadAssets(){
+  this.load.image('ster','https://labs.phaser.io/assets/demoscene/star.png');
+  this.load.spritesheet('held','https://labs.phaser.io/assets/sprites/dude.png',{frameWidth:32,frameHeight:48});
+  this.load.image('grond','https://labs.phaser.io/assets/sprites/platform.png');
+}
+function maakSpel(){
+  this.anims.create({key:'links',frames:this.anims.generateFrameNumbers('held',{start:0,end:3}),frameRate:10,repeat:-1});
+  this.anims.create({key:'rechts',frames:this.anims.generateFrameNumbers('held',{start:5,end:8}),frameRate:10,repeat:-1});
+  this.anims.create({key:'stil',frames:[{key:'held',frame:4}],frameRate:20});
+  const vloer=this.physics.add.staticImage(250,250,'grond').setScale(2,0.5).refreshBody();
+  speler=this.physics.add.sprite(100,165,'held').setScale(2);
+  speler.setCollideWorldBounds(true);
+  this.physics.add.collider(speler,vloer);
+  sterren=this.physics.add.group({key:'ster',repeat:5,setXY:{x:30,y:20,stepX:82}});
+  sterren.getChildren().forEach(s=>{s.setBounce(0.5);s.setCollideWorldBounds(true);});
+  this.physics.add.overlap(speler,sterren,(sp,ster)=>ster.disableBody(true,true),null,this);
+  toetsen=this.input.keyboard.createCursorKeys();
+  tekst=this.add.text(250,248,'',{fontSize:'13px',fill:'#3ecf8e'}).setOrigin(0.5);
+}
+function updateSpel(){
+  speler.setVelocityX(0);
+  if(toetsen.left.isDown){speler.setVelocityX(-200);speler.anims.play('links',true);}
+  else if(toetsen.right.isDown){speler.setVelocityX(200);speler.anims.play('rechts',true);}
+  else{speler.anims.play('stil',true);}
+  if(toetsen.up.isDown&&speler.body.touching.down){speler.setVelocityY(-420);}
+  const actief=sterren.getChildren().filter(s=>s.active).length;
+  tekst.setText(actief===0?'🎉 Alle sterren! Gewonnen!':'Nog '+actief+' ster'+(actief===1?'':'ren')+'...');
+}
+new Phaser.Game(config);
+<\/script></body></html>`
+      }
+    ]
+  },
+
+  // ─── LES 10: SCORE & UI ──────────────────────────────────
+  {
+    naam: "Score & UI",
+    stappen: [
+      {
+        naam: "Score bijhouden",
+        desc: "variabele + setText()",
+        uitleg: "Een score is een <strong>variabele</strong> die je verhoogt, en een <strong>tekstvak</strong> dat je bijwerkt met <strong>setText()</strong>. Sla het tekstvak op buiten create() zodat je callback-functies er aan kunnen.",
+        blokken: [
+          {
+            label: "score aanmaken en bijwerken",
+            nieuw: true,
+            code:
+`<span class="kw">let</span> <span class="prop">score</span> = <span class="num">0</span>;       <span class="cm">// score teller</span>
+<span class="kw">let</span> <span class="prop">scoreTekst</span>;     <span class="cm">// tekstvak</span>
+
+<span class="kw">function</span> <span class="fn">maakSpel</span>() {
+  scoreTekst = <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">text</span>(<span class="num">16</span>, <span class="num">16</span>, <span class="str">'Score: 0'</span>, {
+    <span class="prop">fontSize</span>: <span class="str">'24px'</span>,
+    <span class="prop">fill</span>: <span class="str">'#ffd700'</span>,
+    <span class="prop">fontStyle</span>: <span class="str">'bold'</span>
+  }).<span class="fn">setDepth</span>(<span class="num">50</span>); <span class="cm">// altijd bovenaan</span>
+}
+
+<span class="kw">function</span> <span class="fn">raapSterOp</span>(speler, ster) {
+  ster.<span class="fn">disableBody</span>(<span class="kw">true</span>, <span class="kw">true</span>);
+  score += <span class="num">10</span>;
+  scoreTekst.<span class="fn">setText</span>(<span class="str">'Score: '</span> + score);
+}`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+let speler,sterren,toetsen,scoreTekst,score=0;
+const config={type:Phaser.AUTO,width:500,height:260,backgroundColor:'#0f3460',physics:{default:'arcade',arcade:{gravity:{y:400},debug:false}},scene:{preload:laadAssets,create:maakSpel,update:updateSpel}};
+function laadAssets(){
+  this.load.image('ster','https://labs.phaser.io/assets/demoscene/star.png');
+  this.load.spritesheet('held','https://labs.phaser.io/assets/sprites/dude.png',{frameWidth:32,frameHeight:48});
+  this.load.image('grond','https://labs.phaser.io/assets/sprites/platform.png');
+}
+function maakSpel(){
+  this.anims.create({key:'links',frames:this.anims.generateFrameNumbers('held',{start:0,end:3}),frameRate:10,repeat:-1});
+  this.anims.create({key:'rechts',frames:this.anims.generateFrameNumbers('held',{start:5,end:8}),frameRate:10,repeat:-1});
+  this.anims.create({key:'stil',frames:[{key:'held',frame:4}],frameRate:20});
+  const vloer=this.physics.add.staticImage(250,250,'grond').setScale(2,0.5).refreshBody();
+  speler=this.physics.add.sprite(100,165,'held').setScale(2);
+  speler.setCollideWorldBounds(true);
+  this.physics.add.collider(speler,vloer);
+  sterren=this.physics.add.group({key:'ster',repeat:6,setXY:{x:30,y:20,stepX:68}});
+  sterren.getChildren().forEach(s=>{s.setBounce(0.5);s.setCollideWorldBounds(true);});
+  this.physics.add.overlap(speler,sterren,raapSterOp,null,this);
+  toetsen=this.input.keyboard.createCursorKeys();
+  scoreTekst=this.add.text(16,16,'Score: 0',{fontSize:'22px',fill:'#ffd700',fontStyle:'bold'}).setDepth(50);
+}
+function raapSterOp(sp,ster){ster.disableBody(true,true);score+=10;scoreTekst.setText('Score: '+score);}
+function updateSpel(){
+  speler.setVelocityX(0);
+  if(toetsen.left.isDown){speler.setVelocityX(-200);speler.anims.play('links',true);}
+  else if(toetsen.right.isDown){speler.setVelocityX(200);speler.anims.play('rechts',true);}
+  else{speler.anims.play('stil',true);}
+  if(toetsen.up.isDown&&speler.body.touching.down){speler.setVelocityY(-420);}
+}
+new Phaser.Game(config);
+<\/script></body></html>`
+      },
+      {
+        naam: "Afteltimer",
+        desc: "this.time.addEvent()",
+        uitleg: "Met <strong>this.time.addEvent()</strong> maak je een herhalende timer. Elke 1000ms roept Phaser je callback aan. Verlaag de tijd elke seconde, en stop het spel als die 0 bereikt.",
+        blokken: [
+          {
+            label: "timer aanmaken in create()",
+            nieuw: true,
+            code:
+`<span class="kw">let</span> <span class="prop">tijd</span> = <span class="num">30</span>;
+<span class="kw">let</span> <span class="prop">tijdTekst</span>;
+
+<span class="kw">function</span> <span class="fn">maakSpel</span>() {
+  tijdTekst = <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">text</span>(<span class="num">484</span>, <span class="num">16</span>, <span class="str">'Tijd: 30'</span>, {
+    <span class="prop">fontSize</span>: <span class="str">'22px'</span>, <span class="prop">fill</span>: <span class="str">'#ffffff'</span>
+  }).<span class="fn">setOrigin</span>(<span class="num">1</span>, <span class="num">0</span>).<span class="fn">setDepth</span>(<span class="num">50</span>);
+
+  <span class="kw">this</span>.<span class="prop">time</span>.<span class="fn">addEvent</span>({
+    <span class="prop">delay</span>: <span class="num">1000</span>,           <span class="cm">// elke 1000ms</span>
+    <span class="prop">callback</span>: <span class="fn">telAf</span>,
+    <span class="prop">callbackScope</span>: <span class="kw">this</span>,
+    <span class="prop">loop</span>: <span class="kw">true</span>
+  });
+}
+
+<span class="kw">function</span> <span class="fn">telAf</span>() {
+  tijd--;
+  tijdTekst.<span class="fn">setText</span>(<span class="str">'Tijd: '</span> + tijd);
+  <span class="kw">if</span> (tijd <= <span class="num">5</span>) tijdTekst.<span class="fn">setFill</span>(<span class="str">'#ff6b6b'</span>); <span class="cm">// rood</span>
+  <span class="kw">if</span> (tijd <= <span class="num">0</span>) { <span class="cm">/* stop het spel */</span> }
+}`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+let speler,sterren,toetsen,scoreTekst,tijdTekst,score=0,tijd=20;
+const config={type:Phaser.AUTO,width:500,height:260,backgroundColor:'#0f3460',physics:{default:'arcade',arcade:{gravity:{y:400},debug:false}},scene:{preload:laadAssets,create:maakSpel,update:updateSpel}};
+function laadAssets(){
+  this.load.image('ster','https://labs.phaser.io/assets/demoscene/star.png');
+  this.load.spritesheet('held','https://labs.phaser.io/assets/sprites/dude.png',{frameWidth:32,frameHeight:48});
+  this.load.image('grond','https://labs.phaser.io/assets/sprites/platform.png');
+}
+function maakSpel(){
+  this.anims.create({key:'links',frames:this.anims.generateFrameNumbers('held',{start:0,end:3}),frameRate:10,repeat:-1});
+  this.anims.create({key:'rechts',frames:this.anims.generateFrameNumbers('held',{start:5,end:8}),frameRate:10,repeat:-1});
+  this.anims.create({key:'stil',frames:[{key:'held',frame:4}],frameRate:20});
+  const vloer=this.physics.add.staticImage(250,250,'grond').setScale(2,0.5).refreshBody();
+  speler=this.physics.add.sprite(100,165,'held').setScale(2);
+  speler.setCollideWorldBounds(true);
+  this.physics.add.collider(speler,vloer);
+  sterren=this.physics.add.group({key:'ster',repeat:6,setXY:{x:30,y:20,stepX:68}});
+  sterren.getChildren().forEach(s=>{s.setBounce(0.5);s.setCollideWorldBounds(true);});
+  this.physics.add.overlap(speler,sterren,(sp,s)=>{s.disableBody(true,true);score+=10;scoreTekst.setText('Score: '+score);},null,this);
+  toetsen=this.input.keyboard.createCursorKeys();
+  scoreTekst=this.add.text(16,16,'Score: 0',{fontSize:'20px',fill:'#ffd700',fontStyle:'bold'}).setDepth(50);
+  tijdTekst=this.add.text(484,16,'Tijd: 20',{fontSize:'20px',fill:'#fff'}).setOrigin(1,0).setDepth(50);
+  this.time.addEvent({delay:1000,callback:function(){tijd--;tijdTekst.setText('Tijd: '+tijd);if(tijd<=5)tijdTekst.setFill('#ff6b6b');if(tijd<=0){this.add.text(250,125,'TIJD OP!  Score: '+score,{fontSize:'26px',fill:'#ff6b6b',fontStyle:'bold'}).setOrigin(0.5).setDepth(100);}},callbackScope:this,loop:true});
+}
+function updateSpel(){
+  if(tijd<=0)return;
+  speler.setVelocityX(0);
+  if(toetsen.left.isDown){speler.setVelocityX(-200);speler.anims.play('links',true);}
+  else if(toetsen.right.isDown){speler.setVelocityX(200);speler.anims.play('rechts',true);}
+  else{speler.anims.play('stil',true);}
+  if(toetsen.up.isDown&&speler.body.touching.down){speler.setVelocityY(-420);}
+}
+new Phaser.Game(config);
+<\/script></body></html>`
+      },
+      {
+        naam: "Levens + knippereffect",
+        desc: "levens aftrekken + tweens.add()",
+        uitleg: "Bij aanraking met een vijand verliest de speler een leven. We voegen een <strong>knippereffect</strong> toe via <strong>tweens.add()</strong> — zo is de speler even onkwetsbaar na een treffer.",
+        blokken: [
+          {
+            label: "levens bijhouden + knippereffect",
+            nieuw: true,
+            code:
+`<span class="kw">let</span> <span class="prop">levens</span> = <span class="num">3</span>;
+<span class="kw">let</span> <span class="prop">onkwetsbaar</span> = <span class="kw">false</span>;
+
+<span class="kw">function</span> <span class="fn">geraakt</span>() {
+  <span class="kw">if</span> (onkwetsbaar) <span class="kw">return</span>; <span class="cm">// nog veilig</span>
+  levens--;
+  levensTekst.<span class="fn">setText</span>(
+    <span class="str">'❤️ '</span>.<span class="fn">repeat</span>(levens).<span class="fn">trim</span>() || <span class="str">'💀'</span>
+  );
+  <span class="kw">if</span> (levens <= <span class="num">0</span>) { <span class="cm">/* game over */</span> <span class="kw">return</span>; }
+
+  <span class="cm">// Knippereffect: 2s onkwetsbaar</span>
+  onkwetsbaar = <span class="kw">true</span>;
+  <span class="kw">this</span>.<span class="prop">tweens</span>.<span class="fn">add</span>({
+    <span class="prop">targets</span>: speler,
+    <span class="prop">alpha</span>: <span class="num">0.2</span>,
+    <span class="prop">duration</span>: <span class="num">100</span>,
+    <span class="prop">yoyo</span>: <span class="kw">true</span>,
+    <span class="prop">repeat</span>: <span class="num">9</span>,
+    <span class="prop">onComplete</span>: () => {
+      onkwetsbaar = <span class="kw">false</span>;
+      speler.<span class="fn">setAlpha</span>(<span class="num">1</span>);
+    }
+  });
+}`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+let speler,vijanden,toetsen,levensTekst,levens=3,spelActief=true,onkwetsbaar=false;
+const config={type:Phaser.AUTO,width:500,height:260,backgroundColor:'#0f3460',physics:{default:'arcade',arcade:{gravity:{y:400},debug:false}},scene:{preload:laadAssets,create:maakSpel,update:updateSpel}};
+function laadAssets(){
+  this.load.spritesheet('held','https://labs.phaser.io/assets/sprites/dude.png',{frameWidth:32,frameHeight:48});
+  this.load.image('grond','https://labs.phaser.io/assets/sprites/platform.png');
+  this.load.image('bom','https://labs.phaser.io/assets/sprites/bomb.png');
+}
+function maakSpel(){
+  this.anims.create({key:'links',frames:this.anims.generateFrameNumbers('held',{start:0,end:3}),frameRate:10,repeat:-1});
+  this.anims.create({key:'rechts',frames:this.anims.generateFrameNumbers('held',{start:5,end:8}),frameRate:10,repeat:-1});
+  this.anims.create({key:'stil',frames:[{key:'held',frame:4}],frameRate:20});
+  const vloer=this.physics.add.staticImage(250,250,'grond').setScale(2,0.5).refreshBody();
+  speler=this.physics.add.sprite(100,165,'held').setScale(2);
+  speler.setCollideWorldBounds(true);
+  this.physics.add.collider(speler,vloer);
+  vijanden=this.physics.add.group();
+  for(let i=0;i<3;i++){const b=vijanden.create(Phaser.Math.Between(50,450),40,'bom');b.setVelocity(Phaser.Math.Between(-120,120),Phaser.Math.Between(80,140));b.setCollideWorldBounds(true);b.setBounce(1,1);}
+  this.physics.add.overlap(speler,vijanden,function(){
+    if(!spelActief||onkwetsbaar)return;
+    levens--;levensTekst.setText(levens>0?'❤️ '.repeat(levens).trim():'💀');
+    if(levens<=0){spelActief=false;this.add.text(250,120,'GAME OVER',{fontSize:'36px',fill:'#ff6b6b',fontStyle:'bold'}).setOrigin(0.5).setDepth(100);return;}
+    onkwetsbaar=true;
+    this.tweens.add({targets:speler,alpha:0.2,duration:100,yoyo:true,repeat:9,onComplete:()=>{onkwetsbaar=false;speler.setAlpha(1);}});
+  },null,this);
+  toetsen=this.input.keyboard.createCursorKeys();
+  levensTekst=this.add.text(250,10,'❤️ ❤️ ❤️',{fontSize:'18px'}).setOrigin(0.5,0).setDepth(50);
+  this.add.text(250,248,'Ontwijkt de bommen!',{fontSize:'11px',fill:'#55556a'}).setOrigin(0.5);
+}
+function updateSpel(){
+  if(!spelActief)return;
+  speler.setVelocityX(0);
+  if(toetsen.left.isDown){speler.setVelocityX(-200);speler.anims.play('links',true);}
+  else if(toetsen.right.isDown){speler.setVelocityX(200);speler.anims.play('rechts',true);}
+  else{speler.anims.play('stil',true);}
+  if(toetsen.up.isDown&&speler.body.touching.down){speler.setVelocityY(-420);}
+}
+new Phaser.Game(config);
+<\/script></body></html>`
+      }
+    ]
+  },
+
+  // ─── LES 11: SCENES ──────────────────────────────────────
+  {
+    naam: "Meerdere Scenes",
+    stappen: [
+      {
+        naam: "Wat zijn scenes?",
+        desc: "aparte schermen in je spel",
+        uitleg: "Een <strong>scene</strong> is een apart scherm: startmenu, level 1, game-over. Elke scene heeft zijn eigen preload/create/update. Je wisselt van scene met <strong>this.scene.start('naam')</strong>.",
+        blokken: [
+          {
+            label: "scene-structuur — concept",
+            nieuw: true,
+            code:
+`<span class="cm">// Elke scene is een object met een unieke 'key'</span>
+<span class="kw">const</span> <span class="prop">MenuScene</span> = {
+  <span class="prop">key</span>: <span class="str">'Menu'</span>,
+  <span class="fn">create</span>: <span class="kw">function</span>() {
+    <span class="kw">this</span>.<span class="prop">input</span>.<span class="prop">on</span>(<span class="str">'pointerdown'</span>, () => {
+      <span class="kw">this</span>.<span class="prop">scene</span>.<span class="fn">start</span>(<span class="str">'Spel'</span>); <span class="cm">// wissel scene</span>
+    });
+  }
+};
+
+<span class="kw">const</span> <span class="prop">SpelScene</span>    = { <span class="prop">key</span>: <span class="str">'Spel'</span>,    <span class="prop">create</span>: <span class="kw">function</span>(){} };
+<span class="kw">const</span> <span class="prop">GameOverScene</span> = { <span class="prop">key</span>: <span class="str">'GameOver'</span>, <span class="prop">create</span>: <span class="kw">function</span>(){} };
+
+<span class="cm">// Alle scenes in de config — eerste = startscene</span>
+<span class="kw">const</span> <span class="prop">config</span> = {
+  <span class="prop">scene</span>: [<span class="prop">MenuScene</span>, <span class="prop">SpelScene</span>, <span class="prop">GameOverScene</span>]
+};`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body style="background:#0e0e14;margin:0;font-family:monospace;display:flex;align-items:center;justify-content:center;height:100vh;"><div style="color:#e8e8f0;max-width:420px;text-align:center;"><p style="color:#9090a8;font-size:13px;margin-bottom:1.5rem;">Een spel bestaat uit meerdere scenes:</p><div style="display:flex;gap:10px;justify-content:center;align-items:center;"><div style="background:#16161f;border:1px solid #f5a623;border-radius:8px;padding:12px 16px;text-align:center;min-width:80px;"><div style="font-size:22px;margin-bottom:5px;">🏠</div><div style="color:#f5a623;font-size:12px;font-weight:700;">Menu</div></div><div style="color:#3a3a50;font-size:20px;">→</div><div style="background:#16161f;border:1px solid #3ecf8e;border-radius:8px;padding:12px 16px;text-align:center;min-width:80px;"><div style="font-size:22px;margin-bottom:5px;">🎮</div><div style="color:#3ecf8e;font-size:12px;font-weight:700;">Spel</div></div><div style="color:#3a3a50;font-size:20px;">→</div><div style="background:#16161f;border:1px solid #ff6b6b;border-radius:8px;padding:12px 16px;text-align:center;min-width:80px;"><div style="font-size:22px;margin-bottom:5px;">💀</div><div style="color:#ff6b6b;font-size:12px;font-weight:700;">Game Over</div></div></div><p style="color:#55556a;font-size:12px;margin-top:1.5rem;">this.scene.start('naam') om te wisselen</p></div></body></html>`
+      },
+      {
+        naam: "MenuScene bouwen",
+        desc: "titel + knipperende hint + klik",
+        uitleg: "De MenuScene toont een titel en een knipperende hint. <strong>tweens.add()</strong> animeert de hint. Bij een klik starten we de SpelScene met <strong>this.scene.start('Spel')</strong>.",
+        blokken: [
+          {
+            label: "MenuScene — volledig",
+            nieuw: true,
+            code:
+`<span class="kw">const</span> <span class="prop">MenuScene</span> = {
+  <span class="prop">key</span>: <span class="str">'Menu'</span>,
+  <span class="fn">create</span>: <span class="kw">function</span>() {
+
+    <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">text</span>(<span class="num">250</span>, <span class="num">100</span>, <span class="str">'Mijn Spel'</span>, {
+      <span class="prop">fontSize</span>: <span class="str">'40px'</span>, <span class="prop">fill</span>: <span class="str">'#a89fff'</span>, <span class="prop">fontStyle</span>: <span class="str">'bold'</span>
+    }).<span class="fn">setOrigin</span>(<span class="num">0.5</span>);
+
+    <span class="kw">const</span> <span class="prop">hint</span> = <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">text</span>(<span class="num">250</span>, <span class="num">180</span>,
+      <span class="str">'Klik om te starten'</span>,
+      { <span class="prop">fontSize</span>: <span class="str">'20px'</span>, <span class="prop">fill</span>: <span class="str">'#ffffff'</span> }
+    ).<span class="fn">setOrigin</span>(<span class="num">0.5</span>);
+
+    <span class="cm">// Knipperanimatie via tween</span>
+    <span class="kw">this</span>.<span class="prop">tweens</span>.<span class="fn">add</span>({
+      <span class="prop">targets</span>: hint, <span class="prop">alpha</span>: <span class="num">0</span>,
+      <span class="prop">duration</span>: <span class="num">600</span>, <span class="prop">yoyo</span>: <span class="kw">true</span>, <span class="prop">repeat</span>: <span class="num">-1</span>
+    });
+
+    <span class="kw">this</span>.<span class="prop">input</span>.<span class="prop">on</span>(<span class="str">'pointerdown'</span>, () => {
+      <span class="kw">this</span>.<span class="prop">scene</span>.<span class="fn">start</span>(<span class="str">'Spel'</span>);
+    });
+  }
+};`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+const MenuScene={key:'Menu',create:function(){
+  this.add.rectangle(250,150,500,300,0x0f3460);
+  this.add.text(250,100,'Mijn Spel',{fontSize:'40px',fill:'#a89fff',fontStyle:'bold'}).setOrigin(0.5);
+  const hint=this.add.text(250,180,'Klik om te starten',{fontSize:'20px',fill:'#fff'}).setOrigin(0.5);
+  this.tweens.add({targets:hint,alpha:0,duration:600,yoyo:true,repeat:-1});
+  this.add.text(250,245,'MenuScene',{fontSize:'11px',fill:'#55556a'}).setOrigin(0.5);
+  this.input.on('pointerdown',()=>this.scene.start('Spel'));
+}};
+const SpelScene={key:'Spel',create:function(){
+  this.add.rectangle(250,150,500,300,0x16213e);
+  this.add.text(250,120,'🎮 Spel gestart!',{fontSize:'32px',fill:'#3ecf8e'}).setOrigin(0.5);
+  this.add.text(250,175,'SpelScene',{fontSize:'12px',fill:'#55556a'}).setOrigin(0.5);
+  this.add.text(250,220,'Klik voor Game Over',{fontSize:'14px',fill:'#9090a8'}).setOrigin(0.5);
+  this.input.on('pointerdown',()=>this.scene.start('GameOver',{score:120}));
+}};
+const GameOverScene={key:'GameOver',
+  init:function(d){this.score=d.score||0;},
+  create:function(){
+  this.add.rectangle(250,150,500,300,0x1a0010);
+  this.add.text(250,100,'GAME OVER',{fontSize:'38px',fill:'#ff6b6b',fontStyle:'bold'}).setOrigin(0.5);
+  this.add.text(250,165,'Score: '+this.score,{fontSize:'22px',fill:'#ffd700'}).setOrigin(0.5);
+  const h=this.add.text(250,220,'Klik voor menu',{fontSize:'14px',fill:'#9090a8'}).setOrigin(0.5);
+  this.tweens.add({targets:h,alpha:0.3,duration:600,yoyo:true,repeat:-1});
+  this.input.on('pointerdown',()=>this.scene.start('Menu'));
+}};
+const config={type:Phaser.AUTO,width:500,height:300,scene:[MenuScene,SpelScene,GameOverScene]};
+new Phaser.Game(config);
+<\/script></body></html>`
+      },
+      {
+        naam: "Data doorgeven tussen scenes",
+        desc: "scene.start(naam, data) + init(data)",
+        uitleg: "Je geeft data mee via <strong>scene.start('naam', { ... })</strong>. De ontvangende scene pikt dit op in de <strong>init(data)</strong> functie, die automatisch vóór create() aangeroepen wordt.",
+        blokken: [
+          {
+            label: "data meesturen vanuit SpelScene",
+            nieuw: true,
+            code:
+`<span class="cm">// In SpelScene: score en naam meesturen</span>
+<span class="kw">this</span>.<span class="prop">scene</span>.<span class="fn">start</span>(<span class="str">'GameOver'</span>, {
+  <span class="prop">score</span>: score,
+  <span class="prop">naam</span>: <span class="str">'Speler 1'</span>
+});`
+          },
+          {
+            label: "data ontvangen via init() in GameOverScene",
+            nieuw: true,
+            code:
+`<span class="kw">const</span> <span class="prop">GameOverScene</span> = {
+  <span class="prop">key</span>: <span class="str">'GameOver'</span>,
+
+  <span class="cm">// init() → wordt vóór create() aangeroepen</span>
+  <span class="fn">init</span>: <span class="kw">function</span>(data) {
+    <span class="kw">this</span>.<span class="prop">eindScore</span> = data.score;
+    <span class="kw">this</span>.<span class="prop">naam</span>      = data.naam;
+  },
+
+  <span class="fn">create</span>: <span class="kw">function</span>() {
+    <span class="kw">this</span>.<span class="prop">add</span>.<span class="fn">text</span>(<span class="num">250</span>, <span class="num">160</span>,
+      <span class="kw">this</span>.<span class="prop">naam</span> + <span class="str">': '</span> + <span class="kw">this</span>.<span class="prop">eindScore</span> + <span class="str">' punten'</span>,
+      { <span class="prop">fontSize</span>: <span class="str">'22px'</span>, <span class="prop">fill</span>: <span class="str">'#ffd700'</span> }
+    ).<span class="fn">setOrigin</span>(<span class="num">0.5</span>);
+  }
+};`
+          }
+        ],
+        volledigeCode: `<!DOCTYPE html><html><body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"><\/script>
+<script>
+const MenuScene={key:'Menu',create:function(){
+  this.add.rectangle(250,150,500,300,0x0f3460);
+  this.add.text(250,110,'Mijn Spel',{fontSize:'36px',fill:'#a89fff',fontStyle:'bold'}).setOrigin(0.5);
+  const h=this.add.text(250,180,'Klik om te starten',{fontSize:'18px',fill:'#fff'}).setOrigin(0.5);
+  this.tweens.add({targets:h,alpha:0,duration:700,yoyo:true,repeat:-1});
+  this.input.on('pointerdown',()=>this.scene.start('Spel',{score:0}));
+}};
+const SpelScene={key:'Spel',
+  init:function(d){this.score=d.score||0;},
+  create:function(){
+  this.add.rectangle(250,150,500,300,0x16213e);
+  this.scoreTekst=this.add.text(16,16,'Score: 0',{fontSize:'20px',fill:'#ffd700',fontStyle:'bold'});
+  this.add.text(250,130,'Klik = +10 punten',{fontSize:'16px',fill:'#9090a8'}).setOrigin(0.5);
+  this.add.text(250,175,'Dubbelklik = Game Over',{fontSize:'13px',fill:'#55556a'}).setOrigin(0.5);
+  this.input.on('pointerdown',()=>{this.score+=10;this.scoreTekst.setText('Score: '+this.score);});
+  this.input.on('pointerdbldown',()=>this.scene.start('GameOver',{score:this.score,naam:'Jij'}));
+}};
+const GameOverScene={key:'GameOver',
+  init:function(d){this.eindScore=d.score;this.naam=d.naam||'Speler';},
+  create:function(){
+  this.add.rectangle(250,150,500,300,0x1a0010);
+  this.add.text(250,90,'GAME OVER',{fontSize:'36px',fill:'#ff6b6b',fontStyle:'bold'}).setOrigin(0.5);
+  this.add.text(250,155,this.naam+' scoorde: '+this.eindScore+' punten',{fontSize:'18px',fill:'#ffd700'}).setOrigin(0.5);
+  const h=this.add.text(250,215,'Klik voor menu',{fontSize:'14px',fill:'#9090a8'}).setOrigin(0.5);
+  this.tweens.add({targets:h,alpha:0.3,duration:600,yoyo:true,repeat:-1});
+  this.input.on('pointerdown',()=>this.scene.start('Menu'));
+}};
+const config={type:Phaser.AUTO,width:500,height:300,scene:[MenuScene,SpelScene,GameOverScene]};
 new Phaser.Game(config);
 <\/script></body></html>`
       }
